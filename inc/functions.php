@@ -14,3 +14,7 @@ function wppc_no_fm() {
 		</div>
 <?php
 }
+
+// Start Your Engines.
+require_once( 'post-types/episodes.php' );
+require_once( 'post-types/sponsors.php' );
