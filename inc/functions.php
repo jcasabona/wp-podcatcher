@@ -16,5 +16,4 @@ function wppc_no_fm() {
 }
 
 // Start Your Engines.
-require_once( 'post-types/episodes.php' );
-require_once( 'post-types/sponsors.php' );
+require_once( 'post-types/parent-class.php' );
