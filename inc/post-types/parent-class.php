@@ -43,6 +43,7 @@ class WP_Podcatcher {
 
 		add_action( 'init', array( $this, 'register_cpt' ) );
 		add_action( 'fm_post_' . $this->name, array( $this, 'fm_setup' ) );
+		add_action( 'admin_init', array( $this, 'register_tax' ), 15 );
 	}
 
 
@@ -92,7 +93,7 @@ class WP_Podcatcher {
 			'can_export'          => true,
 			'rewrite'             => true,
 			'capability_type'     => 'post',
-			'supports'            => array( 'title', 'thumbnail', 'revisions', 'comments' ),
+			'supports'            => array( 'title', 'editor', 'thumbnail', 'revisions', 'comments' ),
 		) );
 
 	}
@@ -103,6 +104,43 @@ class WP_Podcatcher {
 	public function fm_setup() {
 		// Slug for the time being.
 		return;
+	}
+
+	/**
+	 * Register a default custom Category
+	 */
+	public function register_tax() {
+
+		$tax_name = $this->name . '-categories';
+		$tax_label = ucfirst( $this->name );
+
+		register_taxonomy( $tax_name, array( $this->name ), array(
+			'labels' => array(
+				'name'					=> __( $tax_label . ' Categories', 'wp-podcatcher' ),
+				'singular_name'			=> __( $tax_label . ' Category', 'wp-podcatcher' ),
+				'search_items'			=> __( 'Search ' . $tax_label . 's Categories', 'wp-podcatcher' ),
+				'popular_items'			=> __( 'Popular ' . $tax_label . 's Categories', 'wp-podcatcher' ),
+				'all_items'				=> __( 'All ' . $tax_label . 's Categories', 'wp-podcatcher' ),
+				'parent_item'			=> __( 'Parent ' . $tax_label . ' Category', 'wp-podcatcher' ),
+				'parent_item_colon'		=> __( 'Parent ' . $tax_label . ' Category', 'wp-podcatcher' ),
+				'edit_item'				=> __( 'Edit ' . $tax_label . ' Category', 'wp-podcatcher' ),
+				'update_item'			=> __( 'Update ' . $tax_label . ' Category', 'wp-podcatcher' ),
+				'add_new_item'			=> __( 'Add New ' . $tax_label . ' Category', 'wp-podcatcher' ),
+				'new_item_name'			=> __( 'New ' . $tax_label . ' Category Name', 'wp-podcatcher' ),
+				'add_or_remove_items'	=> __( 'Add or remove ' . $tax_label . 's Categories', 'wp-podcatcher' ),
+				'choose_from_most_used'	=> __( 'Choose from most used wp-podcatcher', 'wp-podcatcher' ),
+				'menu_name'				=> __( $tax_label . ' Category', 'wp-podcatcher' ),
+			),
+			'public'            => true,
+			'show_in_nav_menus' => true,
+			'show_admin_column' => true,
+			'hierarchical'      => true,
+			'show_tagcloud'     => false,
+			'show_ui'           => true,
+			'query_var'         => true,
+			'rewrite'           => true,
+			'query_var'         => true,
+		) );
 	}
 } // END class
 
