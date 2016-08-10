@@ -16,7 +16,10 @@ class WPP_Sponsors extends WP_Podcatcher {
 	 * Our construct
 	 */
 	public function __construct() {
-		parent::__construct( 'sponsor', 'sponsors', 'id' );
+		$this->name = 'sponsor';
+		$this->plural_name = 'sponsors';
+		$this->icon .= 'id';
+		parent::__construct();
 	}
 
 	/**
