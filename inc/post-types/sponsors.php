@@ -26,9 +26,24 @@ class WPP_Sponsors extends WP_Podcatcher {
 	 * Define custom meta fields via Field Manager
 	 */
 	public function fm_setup() {
-		// Slug for the time being.
-		return;
+		$fm = new Fieldmanager_Group( array(
+			'name' => 'wpp_sponsor_group',
+			'children' => array(
+				'wpp_sponsor_link' => new Fieldmanager_Link( 'Sponsor Link' ),
+			),
+		) );
+		$fm->add_meta_box( 'Sponsor Information', array( $this->name ) );
 	}
 } // END class
 
 new WPP_Sponsors();
+
+/** Todo list...
+
+ @TODO: Re-evaluate checkbox for "Current"
+
+ 'wpp_current' => new Fieldmanager_Checkbox( array(
+	 'name' => 'sponsor_current',
+	 'label' => 'Checkbox Label',
+ ) ),
+*/

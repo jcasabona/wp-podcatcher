@@ -43,11 +43,16 @@ class WPP_Episodes extends WP_Podcatcher {
 		) );
 		$fm->add_meta_box( 'Audio Information', array( $this->name ) );
 
+		// @TODO: Add filter to make sure only audio is uploaded.
+
 		$fm = new Fieldmanager_Autocomplete( array(
 			'name' => 'wpp_episode_sponsor',
+			'limit'          => 0,
+			'add_more_label' => 'Add another Sponsor',
+			'sortable'       => true,
 			'show_edit_link' => true,
 			'datasource' => new Fieldmanager_Datasource_Post( array(
-				'query_args' => array( 'post_type' => 'sponsor', 'posts_per_page' => 2 ),
+				'query_args' => array( 'post_type' => 'sponsor', 'limit' => 2 ),
 			) ),
 		) );
 
