@@ -36,11 +36,7 @@ class WP_Podcatcher {
 	/**
 	 * Our construct
 	 */
-	public function __construct( $name, $plural_name, $icon ) {
-		$this->name = $name;
-		$this->plural_name = $plural_name;
-		$this->icon .= $icon;
-
+	public function __construct() {
 		add_action( 'init', array( $this, 'register_cpt' ) );
 		add_action( 'fm_post_' . $this->name, array( $this, 'fm_setup' ) );
 		add_action( 'admin_init', array( $this, 'register_tax' ), 15 );

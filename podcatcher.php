@@ -22,3 +22,9 @@ include_once( 'inc/functions.php' );
 if ( ! defined( 'FM_VERSION' ) ) {
 	add_action( 'admin_notices', 'wppc_no_fm' );
 }
+
+// Create ad image sizes.
+add_image_size( 'wpp-full-banner', 468, 60 );
+add_image_size( 'wpp-leaderboard', 728, 90 );
+add_image_size( 'wpp-big-square', 336, 280 );
+add_image_size( 'wpp-small-square', 300, 250 );
