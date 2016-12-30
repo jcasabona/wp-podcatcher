@@ -17,6 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /* Include the Goods */
 include_once( 'fm/fieldmanager.php' );
 include_once( 'inc/functions.php' );
+include_once( 'inc/output.php' );
 
 /* Tell user if Field Manager faild to load */
 if ( ! defined( 'FM_VERSION' ) ) {
