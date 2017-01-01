@@ -5,8 +5,11 @@
  * @package wp_podcatcher
  */
 
-add_filter( 'the_content', 'wpp_append_embeded_episode' );
-
+/**
+ * Callback function to insert audio embed into content on episode pages.
+ *
+ * @param String $content from WordPress editor.
+ */
 function wpp_append_embeded_episode( $content ) {
 
 	if ( is_singular( 'episode' ) ) {
@@ -19,3 +22,19 @@ function wpp_append_embeded_episode( $content ) {
 
 	return $content;
 }
+
+// Filter uses above function.
+add_filter( 'the_content', 'wpp_append_embeded_episode' );
+
+
+/**
+ * Callback function to insert sponsors into content on episode pages.
+ *
+ * @param String $content from WordPress editor.
+ */
+function wpp_append_sponsors( $content ) {
+	return $content . wpp_get_sponsors();
+}
+
+// Filter uses above function.
+add_filter( 'the_content', 'wpp_append_sponsors' );
