@@ -39,6 +39,28 @@ function wpp_get_audio_file() {
 }
 
 /**
+ * Function to get latest WPP Episode.
+ *
+ * @return Array
+ */
+function wpp_get_latest_episode() {
+	$episode = new WP_Query( array( 'numberposts' => 1, 'post_type' => 'episode' ) );
+	$episode_data = array();
+
+	while ( $episode->have_posts() ) {
+		$episode->the_post();
+		$episode_data['ID'] = get_the_id();
+		$episode_data['title'] = get_the_title();
+		$episode_data['audio_file'] = wpp_get_audio_file();
+		$episode_data['permalink'] = get_permalink();
+		$episode_data['thumbnail_id'] = get_post_thumbnail_id( get_the_id() );
+	}
+	wp_reset_postdata();
+
+	return $episode_data;
+}
+
+/**
  * Generate HTML for displaying sponsors associated with episode.
  *
  * @return HTML string if there are sponsors, false if there are not.
