@@ -4,12 +4,6 @@
  *
  * @package wp_podcatcher
  */
-
-/**
- * WPP_Episodes registers the episode post type
- *
- * @package wp_podcatcher
- **/
 class WPP_Episodes extends WP_Podcatcher {
 
 	/**
@@ -37,6 +31,7 @@ class WPP_Episodes extends WP_Podcatcher {
 					'modal_button_label' => 'Use this File',
 					'preview_size' => 'icon',
 				) ),
+				'wpp_audio_link' => new Fieldmanager_TextField( 'or Audio File Link'),
 				// 'wpp_audio_size' => new Fieldmanager_TextField( 'Size in Bytes' ),
 				// 'wpp_audio_time' => new Fieldmanager_TextField( 'Duration' ),
 			),
