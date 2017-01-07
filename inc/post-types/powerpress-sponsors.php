@@ -33,4 +33,4 @@ class WPP_PowerPress_Sponsors {
 	}
 } // END class
 
-new WPP_PodPress_Sponsors();
+new WPP_PowerPress_Sponsors();
