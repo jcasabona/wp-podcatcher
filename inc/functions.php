@@ -22,53 +22,15 @@ function wppc_no_fm() {
 require_once( 'post-types/parent-class.php' );
 
 /**
- * Get the audio link that should be embedded. Prioritize uploaded file over link.\
- *
- * @return link if found, false if not.
- */
-function wpp_get_audio_file() {
-	$audio_group = get_post_meta( get_the_id(), 'wpp_audio_group', true );
-
-	if ( ! empty( $audio_group['wpp_audio_file'] ) ) {
-		return wp_get_attachment_url( $audio_group['wpp_audio_file'] );
-	} else if ( ! empty( $audio_group['wpp_audio_link'] ) ) {
-		return $audio_group['wpp_audio_link'];
-	}
-
-	return false;
-}
-
-/**
- * Function to get latest WPP Episode.
- *
- * @return Array
- */
-function wpp_get_latest_episode() {
-	$episode = new WP_Query( array( 'numberposts' => 1, 'post_type' => 'episode' ) );
-	$episode_data = array();
-
-	while ( $episode->have_posts() ) {
-		$episode->the_post();
-		$episode_data['ID'] = get_the_id();
-		$episode_data['title'] = get_the_title();
-		$episode_data['audio_file'] = wpp_get_audio_file();
-		$episode_data['permalink'] = get_permalink();
-		$episode_data['thumbnail_id'] = get_post_thumbnail_id( get_the_id() );
-	}
-	wp_reset_postdata();
-
-	return $episode_data;
-}
-
-/**
  * Generate HTML for displaying sponsors associated with episode.
  *
  * @return HTML string if there are sponsors, false if there are not.
  */
-function wpp_get_sponsors() {
-	$sponsor_ids = get_post_meta( get_the_id(), 'wpp_episode_sponsor', true );
+function wpp_get_sponsors( $episode_id = null ) {
+	$episode_id  = ( ! empty( $episode_id ) ) ? $episode_id :  get_the_id();
+	$sponsor_ids = get_post_meta( $episode_id, 'wpp_episode_sponsor', true );
 
-	if ( empty( $sponsor_ids) ) {
+	if ( empty( $sponsor_ids ) ) {
 		return false;
 	}
 
@@ -105,9 +67,29 @@ function wpp_get_sponsors() {
 
 /**
  * Print results of wpp_get_sponsors()
+ *
+ * @param $episode_id int ID of post to get sponsors.
  */
-function wpp_print_sponsors() {
-	if ( ! empty( wpp_get_sponsors() ) ) {
-		echo wpp_get_sponsors();
+function wpp_print_sponsors( $episode_id = null ) {
+	$episode_id  = ( ! empty( $episode_id ) ) ? $episode_id :  get_the_id();
+	$sponsors = wpp_get_sponsors( $episode_id );
+	if ( ! empty( $sponsors ) ) {
+		echo $sponsors;
 	}
+}
+
+/**
+ * Get the most recent episode's ID
+ */
+function wpp_get_latest_episode() {
+	$args = array(
+		'posts_per_page' => 1,
+		'orderby' => 'post_date',
+		'order' => 'DESC',
+		'meta_key' => 'enclosure', // This is the meta key used by PowerPress.
+	);
+
+	$latest_episode = new WP_Query( $args );
+	$post_ids = wp_list_pluck( $latest_episode->posts, 'ID' );
+	return $post_ids[0];
 }

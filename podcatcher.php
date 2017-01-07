@@ -21,6 +21,7 @@ define( 'WPP_ASSETS', 'WPP_URL' . '/assets/');
 include_once( 'fm/fieldmanager.php' );
 include_once( 'inc/functions.php' );
 include_once( 'inc/output.php' );
+include_once( 'inc/widgets/widgets.php' );
 
 /* Tell user if Field Manager faild to load */
 if ( ! defined( 'FM_VERSION' ) ) {
