@@ -4,7 +4,7 @@
  * Plugin URI: http://howibuilt.it/
  * Description: This plugin allows you to properly power your Podcasting site
  * Author: Joe Casabona
- * Version: 1.0
+ * Version: 0.5
  * Author URI: http://casabona.org/
 
  * @package wp-podcatcher
@@ -32,7 +32,7 @@ function wpp_check_for_powerpress() {
 
 add_action( 'plugins_loaded', 'wpp_check_for_powerpress' );
 
-
+define( 'WPP_VERSION', '0.5' );
 define( 'WPP_URL', plugin_dir_url( __FILE__ ) );
 define( 'WPP_ASSETS', 'WPP_URL' . '/assets/' );
 
