@@ -54,7 +54,7 @@ class WPP_Upcoming_Episode extends WP_Widget {
 	public function form( $instance ) {
 		// Set defaults.
 		if ( ! isset( $instance['title'] ) ) {
-			$instance['title'] = 'Current Sponsors';
+			$instance['title'] = 'Next Episode';
 		}
 
 		$title = $instance['title'];

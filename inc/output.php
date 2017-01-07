@@ -11,9 +11,9 @@
  * @param String $content from WordPress editor.
  */
 function wpp_append_sponsors( $content ) {
-	wpp_get_latest_episode();
+	$sponsor_section = '<h4>Sponsored by:</h4>' . wpp_get_sponsors();
 
-	return $content . wpp_get_sponsors();
+	return $content . $sponsor_section;
 }
 
 // Filter uses above function.
