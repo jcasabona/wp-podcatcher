@@ -34,7 +34,7 @@ add_action( 'plugins_loaded', 'wpp_check_for_powerpress' );
 
 
 define( 'WPP_URL', plugin_dir_url( __FILE__ ) );
-define( 'WPP_ASSETS', 'WPP_URL' . '/assets/');
+define( 'WPP_ASSETS', 'WPP_URL' . '/assets/' );
 
 /* Include the Goods */
 include_once( 'fm/fieldmanager.php' );

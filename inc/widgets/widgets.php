@@ -6,3 +6,4 @@
  */
 
 include( 'current-sponsors.php' );
+include( 'next-episode.php' );

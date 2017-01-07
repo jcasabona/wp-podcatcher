@@ -34,7 +34,7 @@ function wpp_get_sponsors( $episode_id = null ) {
 		return false;
 	}
 
-	$sponsor_output = '<div class="wpp_episode_sponsors">';
+	$sponsor_output = '<div class="wpp-episode-sponsors">';
 	/**
 	 * 1: Sponsor URL
 	 * 2: Post Title (the_title)
@@ -60,6 +60,8 @@ function wpp_get_sponsors( $episode_id = null ) {
 			);
 		}
 		wp_reset_postdata();
+	} else {
+		$sponsor_output .= '<h4 class="wpp-no-sponsors">No sponsors this week. Interested?</h4>';
 	}
 
 	return $sponsor_output . '</div>'; // Close the div we opened on L53.
@@ -92,4 +94,55 @@ function wpp_get_latest_episode() {
 	$latest_episode = new WP_Query( $args );
 	$post_ids = wp_list_pluck( $latest_episode->posts, 'ID' );
 	return $post_ids[0];
+}
+
+/**
+ * Get the next scheduled posts
+ *
+ * @param $posts_per_page int # of posts to display.
+ */
+function wpp_get_upcoming_episodes( $posts_per_page = 1 ) {
+	$args = array(
+		'posts_per_page' => $posts_per_page,
+		'post_status' => 'future',
+		'orderby' => 'post_date',
+		'order' => 'ASC',
+		'meta_key' => 'enclosure', // This is the meta key used by PowerPress.
+	);
+
+	$next_episodes = new WP_Query( $args );
+
+	$episode_output = '<div class="wpp-upcoming-episodes">';
+	/**
+	 * 1: Episode Title
+	 * 2: Time Stamp
+	 * 3: Human Readable Date
+	 */
+	$format = '<div class="wpp-upcoming-episode"><h4>%1$s</h4><time datetime="%2$s">%3$s</time></div>';
+
+	if ( $next_episodes->have_posts() ) {
+		while ( $next_episodes->have_posts() ) {
+			$next_episodes->the_post();
+
+			$episode_output .= sprintf( $format,
+				esc_attr( get_the_title() ),
+				esc_attr( get_the_date( 'c' ) ),
+				get_the_date()
+			);
+		}
+		wp_reset_postdata();
+	} else {
+		$episode_output .= '<h4 class="wpp-no-schedule">There are no scheduled episodes right now.</h4>';
+	}
+
+	return $episode_output . '</div>'; // Close the div we opened on L113.
+}
+
+/**
+ * Print the next scheduled posts
+ *
+ * @param $posts_per_page int # of posts to display.
+ */
+function wpp_print_upcoming_episodes( $posts_per_page = 1 ) {
+	echo wpp_get_upcoming_episodes();
 }
