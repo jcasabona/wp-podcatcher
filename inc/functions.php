@@ -146,3 +146,19 @@ function wpp_get_upcoming_episodes( $posts_per_page = 1 ) {
 function wpp_print_upcoming_episodes( $posts_per_page = 1 ) {
 	echo wpp_get_upcoming_episodes();
 }
+
+/**
+ * Shortcode for next scheduled posts
+ *
+ * @param $atts Array
+ * [wpp_schedule number="1"]
+ */
+function wpp_schedule_shortcode( $atts ) {
+	$a = shortcode_atts( array(
+		'number' => -1,
+	), $atts );
+
+	return wpp_get_upcoming_episodes( $a['number'] );
+}
+
+add_shortcode( 'wpp_schedule', 'wpp_schedule_shortcode' );
