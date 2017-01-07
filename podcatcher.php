@@ -14,6 +14,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+
+/* Tell user if PowerPress is not installed, then kill it. */
+function wpp_check_for_powerpress() {
+	if ( ! defined( 'POWERPRESS_VERSION') ) {
+		add_action( 'admin_notices', function() {
+			?>
+					<div class="notice notice-warning is-dismissible">
+						<p>
+							<?php esc_html_e( 'It looks like PowerPress is not installed. This pluin relies on that.', 'wp-podcatcher' ); ?>
+						</p>
+					</div>
+			<?php
+		} );
+	}
+}
+
+add_action( 'plugins_loaded', 'wpp_check_for_powerpress' );
+
+
 define( 'WPP_URL', plugin_dir_url( __FILE__ ) );
 define( 'WPP_ASSETS', 'WPP_URL' . '/assets/');
 
