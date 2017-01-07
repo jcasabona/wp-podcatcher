@@ -22,7 +22,7 @@ function wpp_check_for_powerpress() {
 			?>
 					<div class="notice notice-warning is-dismissible">
 						<p>
-							<?php esc_html_e( 'It looks like PowerPress is not installed. This pluin relies on that.', 'wp-podcatcher' ); ?>
+							<?php esc_html_e( 'It looks like PowerPress is not installed. We strongly recommend you use that with this plugin.', 'wp-podcatcher' ); ?>
 						</p>
 					</div>
 			<?php
