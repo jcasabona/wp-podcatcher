@@ -142,4 +142,4 @@ class WP_Podcatcher {
 
 //require_once( 'episodes.php' );
 require_once( 'sponsors.php' );
-require_once( 'podpress-sponsors.php' );
+require_once( 'powerpress-sponsors.php' );

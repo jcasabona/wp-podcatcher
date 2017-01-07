@@ -1,10 +1,10 @@
 <?php
 /**
- *  WPP_PodPress_Sponsors registers the metabox for associating sponsors with posts
+ *  WPP_PowerPress_Sponsors registers the metabox for associating sponsors with posts
  *
  * @package wp_podcatcher
  */
-class WPP_PodPress_Sponsors {
+class WPP_PowerPress_Sponsors {
 
 	/**
 	 * Our construct
