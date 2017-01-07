@@ -140,5 +140,6 @@ class WP_Podcatcher {
 	}
 } // END class
 
-require_once( 'episodes.php' );
+//require_once( 'episodes.php' );
 require_once( 'sponsors.php' );
+require_once( 'powerpress-sponsors.php' );

@@ -22,57 +22,19 @@ function wppc_no_fm() {
 require_once( 'post-types/parent-class.php' );
 
 /**
- * Get the audio link that should be embedded. Prioritize uploaded file over link.\
- *
- * @return link if found, false if not.
- */
-function wpp_get_audio_file() {
-	$audio_group = get_post_meta( get_the_id(), 'wpp_audio_group', true );
-
-	if ( ! empty( $audio_group['wpp_audio_file'] ) ) {
-		return wp_get_attachment_url( $audio_group['wpp_audio_file'] );
-	} else if ( ! empty( $audio_group['wpp_audio_link'] ) ) {
-		return $audio_group['wpp_audio_link'];
-	}
-
-	return false;
-}
-
-/**
- * Function to get latest WPP Episode.
- *
- * @return Array
- */
-function wpp_get_latest_episode() {
-	$episode = new WP_Query( array( 'numberposts' => 1, 'post_type' => 'episode' ) );
-	$episode_data = array();
-
-	while ( $episode->have_posts() ) {
-		$episode->the_post();
-		$episode_data['ID'] = get_the_id();
-		$episode_data['title'] = get_the_title();
-		$episode_data['audio_file'] = wpp_get_audio_file();
-		$episode_data['permalink'] = get_permalink();
-		$episode_data['thumbnail_id'] = get_post_thumbnail_id( get_the_id() );
-	}
-	wp_reset_postdata();
-
-	return $episode_data;
-}
-
-/**
  * Generate HTML for displaying sponsors associated with episode.
  *
  * @return HTML string if there are sponsors, false if there are not.
  */
-function wpp_get_sponsors() {
-	$sponsor_ids = get_post_meta( get_the_id(), 'wpp_episode_sponsor', true );
+function wpp_get_sponsors( $episode_id = null ) {
+	$episode_id  = ( ! empty( $episode_id ) ) ? $episode_id :  get_the_id();
+	$sponsor_ids = get_post_meta( $episode_id, 'wpp_episode_sponsor', true );
 
-	if ( empty( $sponsor_ids) ) {
+	if ( empty( $sponsor_ids ) ) {
 		return false;
 	}
 
-	$sponsor_output = '<div class="wpp_episode_sponsors">';
+	$sponsor_output = '<div class="wpp-episode-sponsors">';
 	/**
 	 * 1: Sponsor URL
 	 * 2: Post Title (the_title)
@@ -98,6 +60,8 @@ function wpp_get_sponsors() {
 			);
 		}
 		wp_reset_postdata();
+	} else {
+		$sponsor_output .= '<h4 class="wpp-no-sponsors">No sponsors this week. Interested?</h4>';
 	}
 
 	return $sponsor_output . '</div>'; // Close the div we opened on L53.
@@ -105,9 +69,80 @@ function wpp_get_sponsors() {
 
 /**
  * Print results of wpp_get_sponsors()
+ *
+ * @param $episode_id int ID of post to get sponsors.
  */
-function wpp_print_sponsors() {
-	if ( ! empty( wpp_get_sponsors() ) ) {
-		echo wpp_get_sponsors();
+function wpp_print_sponsors( $episode_id = null ) {
+	$episode_id  = ( ! empty( $episode_id ) ) ? $episode_id :  get_the_id();
+	$sponsors = wpp_get_sponsors( $episode_id );
+	if ( ! empty( $sponsors ) ) {
+		echo $sponsors;
 	}
+}
+
+/**
+ * Get the most recent episode's ID
+ */
+function wpp_get_latest_episode() {
+	$args = array(
+		'posts_per_page' => 1,
+		'orderby' => 'post_date',
+		'order' => 'DESC',
+		'meta_key' => 'enclosure', // This is the meta key used by PowerPress.
+	);
+
+	$latest_episode = new WP_Query( $args );
+	$post_ids = wp_list_pluck( $latest_episode->posts, 'ID' );
+	return $post_ids[0];
+}
+
+/**
+ * Get the next scheduled posts
+ *
+ * @param $posts_per_page int # of posts to display.
+ */
+function wpp_get_upcoming_episodes( $posts_per_page = 1 ) {
+	$args = array(
+		'posts_per_page' => $posts_per_page,
+		'post_status' => 'future',
+		'orderby' => 'post_date',
+		'order' => 'ASC',
+		'meta_key' => 'enclosure', // This is the meta key used by PowerPress.
+	);
+
+	$next_episodes = new WP_Query( $args );
+
+	$episode_output = '<div class="wpp-upcoming-episodes">';
+	/**
+	 * 1: Episode Title
+	 * 2: Time Stamp
+	 * 3: Human Readable Date
+	 */
+	$format = '<div class="wpp-upcoming-episode"><h4>%1$s</h4><time datetime="%2$s">%3$s</time></div>';
+
+	if ( $next_episodes->have_posts() ) {
+		while ( $next_episodes->have_posts() ) {
+			$next_episodes->the_post();
+
+			$episode_output .= sprintf( $format,
+				esc_attr( get_the_title() ),
+				esc_attr( get_the_date( 'c' ) ),
+				get_the_date()
+			);
+		}
+		wp_reset_postdata();
+	} else {
+		$episode_output .= '<h4 class="wpp-no-schedule">There are no scheduled episodes right now.</h4>';
+	}
+
+	return $episode_output . '</div>'; // Close the div we opened on L113.
+}
+
+/**
+ * Print the next scheduled posts
+ *
+ * @param $posts_per_page int # of posts to display.
+ */
+function wpp_print_upcoming_episodes( $posts_per_page = 1 ) {
+	echo wpp_get_upcoming_episodes();
 }
