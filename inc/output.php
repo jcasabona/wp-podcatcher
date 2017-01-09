@@ -11,8 +11,13 @@
  * @param String $content from WordPress editor.
  */
 function wpp_append_sponsors( $content ) {
-	$sponsor_section = '<h4>Sponsored by:</h4>' . wpp_get_sponsors();
+	$sponsor_output = wpp_get_sponsors();
 
+	if ( ! $sponsor_output ) {
+		return $content;
+	}
+
+	$sponsor_section = '<h4>Sponsored by:</h4>' . $sponsor_output;
 	return $content . $sponsor_section;
 }
 

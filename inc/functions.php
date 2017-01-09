@@ -50,7 +50,7 @@ function wpp_get_sponsors( $episode_id = null ) {
 
 			$sponsor_link = get_post_meta( get_the_id(), 'wpp_sponsor_link', true ); // @TODO: Check for link.
 
-			$sponsor_link_content = ( has_post_thumbnail() ) ? get_the_post_thumbnail( get_the_id(), 'large' ) : get_the_title();
+			$sponsor_link_content = ( has_post_thumbnail() ) ? get_the_post_thumbnail( get_the_id(), 'wpp-big-square' ) : get_the_title();
 
 			$sponsor_output .= sprintf( $format,
 				esc_url( $sponsor_link ),
