@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WP Podcatcher
  * Plugin URI: http://howibuilt.it/
- * Description: This plugin allows you to properly power your Podcasting site
+ * Description: This plugin adds some extra features to PowerPress to take your podcasting site to the next level.
  * Author: Joe Casabona
  * Version: 0.5
  * Author URI: http://casabona.org/
