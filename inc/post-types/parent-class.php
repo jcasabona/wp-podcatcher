@@ -87,7 +87,7 @@ class WP_Podcatcher {
 			'has_archive'         => true,
 			'query_var'           => true,
 			'can_export'          => true,
-			'rewrite'             => true,
+			'rewrite'             => array( 'slug' => $this->plural_name ),
 			'capability_type'     => 'post',
 			'supports'            => array( 'title', 'editor', 'thumbnail', 'revisions', 'comments' ),
 		) );
