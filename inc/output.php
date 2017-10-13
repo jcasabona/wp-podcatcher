@@ -21,6 +21,7 @@ function wpp_append_sponsors( $content ) {
 }
 
 // Filter uses above function.
+add_filter( 'the_excerpt_rss', 'wpp_append_sponsors' );
 add_filter( 'the_content', 'wpp_append_sponsors' );
 
 
