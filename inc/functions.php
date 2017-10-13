@@ -35,6 +35,7 @@ function wpp_get_sponsors( $episode_id = null ) {
 	}
 
 	$sponsor_output = '<div class="wpp-episode-sponsors">';
+	$sponsor_output .= '<h4>' . esc_html__( 'Sponsored by:', 'wp-podcatcher' ) . '</h4>';
 	/**
 	 * 1: Sponsor URL
 	 * 2: Post Title (the_title)
@@ -162,3 +163,45 @@ function wpp_schedule_shortcode( $atts ) {
 }
 
 add_shortcode( 'wpp_schedule', 'wpp_schedule_shortcode' );
+
+/**
+ * Generate HTML for displaying transcript associated with episode.
+ *
+ * @return HTML string if there is transcript, false if there are not.
+ */
+function wpp_get_transcript( $episode_id = null ) {
+
+	$episode_id  = ( ! empty( $episode_id ) ) ? $episode_id :  get_the_id();
+	$transcript_ids = get_post_meta( $episode_id, 'wpp_episode_transcript', true );
+
+	if ( empty( $transcript_ids ) ) {
+		return false;
+	}
+
+	$transcript_output = '<div class="wpp-episode-transcript">';
+	$transcript_output .= '<h4>' . esc_html__( 'Transcript:', 'wp-podcatcher' ) . '</h4>';
+	/**
+	 * 1: Description (the_content)
+	 * 2: Media Link
+	 */
+	$format = '<div class="wpp-transcript"><article class="wwp-transcript-text">%1$s</article> <div class="wpp-transcript-download"><a href="%2$s">Download Transcript</a></div>';
+	$transcript = new WP_Query( array( 'post_type' => 'transcript', 'post__in' => $transcript_ids ) );
+
+	if ( $transcript->have_posts() ) {
+		while ( $transcript->have_posts() ) {
+			$transcript->the_post();
+
+			$transcript_link = get_post_meta( get_the_id(), 'wpp_transcript_file', true ); // @TODO: Check for link.
+
+			$transcript_output .= sprintf( $format,
+				get_the_content(),
+				esc_url( $transcript_link )
+			);
+		}
+		wp_reset_postdata();
+	} else {
+		return false;
+	}
+
+	return $transcript_output . '</div>';
+}
