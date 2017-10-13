@@ -4,7 +4,7 @@
  * Plugin URI: http://howibuilt.it/
  * Description: This plugin adds some extra features to PowerPress to take your podcasting site to the next level.
  * Author: Joe Casabona
- * Version: 0.5
+ * Version: 1.0
  * Author URI: http://casabona.org/
 
  * @package wp-podcatcher
