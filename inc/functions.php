@@ -184,19 +184,26 @@ function wpp_get_transcript( $episode_id = null ) {
 	 * 1: Description (the_content)
 	 * 2: Media Link
 	 */
-	$format = '<div class="wpp-transcript"><article class="wwp-transcript-text">%1$s</article> <div class="wpp-transcript-download"><a href="%2$s">Download Transcript</a></div>';
 	$transcript = new WP_Query( array( 'post_type' => 'transcript', 'post__in' => $transcript_ids ) );
 
 	if ( $transcript->have_posts() ) {
 		while ( $transcript->have_posts() ) {
 			$transcript->the_post();
 
-			$transcript_link = get_post_meta( get_the_id(), 'wpp_transcript_file', true ); // @TODO: Check for link.
+			$transcript_link_id = get_post_meta( get_the_id(), 'wpp_transcript_file', true );
 
-			$transcript_output .= sprintf( $format,
-				get_the_content(),
-				esc_url( $transcript_link )
-			);
+			// @TODO: There's probably a more clever way to do this.
+			if ( ! empty( $transcript_link_id ) ) {
+				$format = '<div class="wpp-transcript"><article class="wwp-transcript-text">%1$s</article> <div class="wpp-transcript-download"><a href="%2$s">Download Transcript</a></div>';
+
+				$transcript_output .= sprintf( $format,
+					get_the_content(),
+					esc_url( wp_get_attachment_url( $transcript_link_id ) )
+				);
+			} else {
+				$format = '<div class="wpp-transcript"><article class="wwp-transcript-text">%s</article></div>';
+				$transcript_output .= sprintf( $format, get_the_content() );
+			}
 		}
 		wp_reset_postdata();
 	} else {
