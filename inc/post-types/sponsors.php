@@ -34,13 +34,3 @@ class WPP_Sponsors extends WP_Podcatcher {
 } // END class
 
 new WPP_Sponsors();
-
-/** Todo list...
-
- @TODO: Re-evaluate checkbox for "Current"
-
- 'wpp_current' => new Fieldmanager_Checkbox( array(
-	 'name' => 'sponsor_current',
-	 'label' => 'Checkbox Label',
- ) ),
-*/
