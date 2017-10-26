@@ -13,7 +13,7 @@
 function wpp_append_sponsors( $content ) {
 	$sponsor_output = wpp_get_sponsors();
 
-	if ( ! $sponsor_output ) {
+	if ( ! $sponsor_output ) { // This never executes. 
 		return $content;
 	}
 
@@ -21,9 +21,24 @@ function wpp_append_sponsors( $content ) {
 }
 
 // Filter uses above function.
-add_filter( 'the_excerpt_rss', 'wpp_append_sponsors' );
 add_filter( 'the_content', 'wpp_append_sponsors' );
 
+
+/**
+ * Callback function to insert sponsors into feed on episodes feed.
+ *
+ * @param String $content from WordPress editor.
+ */
+function wpp_append_sponsors_feed( $content ) {
+	$sponsor_output = wpp_get_sponsors_feed();
+
+	if ( ! $sponsor_output ) { // This never executes. 
+		return $content;
+	}
+
+	return $content . $sponsor_output;
+}
+add_filter( 'the_excerpt_rss', 'wpp_append_sponsors_feed' );
 
 /**
  *  Functions to control the output of transcripts.
