@@ -32,7 +32,7 @@ function wpp_check_for_powerpress() {
 
 add_action( 'plugins_loaded', 'wpp_check_for_powerpress' );
 
-define( 'WPP_VERSION', '0.5' );
+define( 'WPP_VERSION', '1.0' );
 define( 'WPP_URL', plugin_dir_url( __FILE__ ) );
 define( 'WPP_ASSETS', 'WPP_URL' . '/assets/' );
 

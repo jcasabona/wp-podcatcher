@@ -26,7 +26,7 @@ require_once( 'post-types/parent-class.php' );
  *
  * @return HTML string if there are sponsors, false if there are not.
  */
-function wpp_get_sponsors( $episode_id = null ) {
+function wpp_get_sponsors( $episode_id = null, $include_title = true ) {
 	global $post;
 	$episode_id  = ( ! empty( $episode_id ) ) ? $episode_id :  $post->ID;
 	$sponsor_ids = get_post_meta( $episode_id, 'wpp_episode_sponsor', true );
@@ -35,15 +35,20 @@ function wpp_get_sponsors( $episode_id = null ) {
 		return false;
 	}
 
-	$sponsor_output = '<div class="wpp-episode-sponsors">';
-	$sponsor_output .= '<h4>' . esc_html__( 'Sponsored by:', 'wp-podcatcher' ) . '</h4>';
+	$sponsor_output = '';
+
+	if ( $include_title ) {
+		$sponsor_output .= '<h4>' . esc_html__( 'Sponsored by:', 'wp-podcatcher' ) . '</h4>';
+	}
+
+	$sponsor_output .= '<div class="wpp-episode-sponsors">';
 	/**
 	 * 1: Sponsor URL
 	 * 2: Post Title (the_title)
 	 * 3: Logo if available, Title if no Logo
 	 * 4: Description (the_content)
 	 */
-	$format = '<div class="wpp-sponsor"><a href="%1$s" title="%2$s" target="_blank">%3$s</a> <p>%4$s</p></div>';
+	$format = '<div class="wpp-sponsor"><a href="%1$s" title="%2$s" target="_blank">%3$s</a></div>';
 	$sponsors = new WP_Query( array( 'post_type' => 'sponsor', 'post__in' => $sponsor_ids ) );
 
 	if ( $sponsors->have_posts() ) {
@@ -57,13 +62,12 @@ function wpp_get_sponsors( $episode_id = null ) {
 			$sponsor_output .= sprintf( $format,
 				esc_url( $sponsor_link ),
 				esc_attr( get_the_title() ),
-				$sponsor_link_content,
-				get_the_content()
+				$sponsor_link_content
 			);
 		}
 		wp_reset_postdata();
 	} else {
-		$sponsor_output .= '<h4 class="wpp-no-sponsors">No sponsors this week. Interested butt head?</h4>';
+		return null;
 	}
 
 	return $sponsor_output . '</div>'; // Close the div we opened on L53.
@@ -74,9 +78,9 @@ function wpp_get_sponsors( $episode_id = null ) {
  *
  * @param $episode_id int ID of post to get sponsors.
  */
-function wpp_print_sponsors( $episode_id = null ) {
+function wpp_print_sponsors( $episode_id = null, $include_title = true ) {
 	$episode_id  = ( ! empty( $episode_id ) ) ? $episode_id :  get_the_id();
-	$sponsors = wpp_get_sponsors( $episode_id );
+	$sponsors = wpp_get_sponsors( $episode_id, $include_title );
 	if ( ! empty( $sponsors ) ) {
 		echo $sponsors;
 	}
@@ -179,39 +183,24 @@ function wpp_get_transcript( $episode_id = null ) {
 		return false;
 	}
 
-	$transcript_output = '<div class="wpp-episode-transcript">';
-	$transcript_output .= '<h4>' . esc_html__( 'Transcript:', 'wp-podcatcher' ) . '</h4>';
-	/**
-	 * 1: Description (the_content)
-	 * 2: Media Link
-	 */
-	$transcript = new WP_Query( array( 'post_type' => 'transcript', 'post__in' => $transcript_ids ) );
+	$transcript_id = array_pop( $transcript_ids );
 
-	if ( $transcript->have_posts() ) {
-		while ( $transcript->have_posts() ) {
-			$transcript->the_post();
+	return sprintf( '<a href="%s" class="wpp-transcript-link button" title="episode transcript">View Transcript</a>', get_permalink( $transcript_id ) );
 
-			$transcript_link_id = get_post_meta( get_the_id(), 'wpp_transcript_file', true );
+}
 
-			// @TODO: There's probably a more clever way to do this.
-			if ( ! empty( $transcript_link_id ) ) {
-				$format = '<div class="wpp-transcript"><article class="wwp-transcript-text">%1$s</article> <div class="wpp-transcript-download"><a href="%2$s">Download Transcript</a></div>';
+function wpp_get_transcript_content( $episode_id = null ) {
+	$episode_id  = ( ! empty( $episode_id ) ) ? $episode_id :  get_the_id();
+	$transcript_ids = get_post_meta( $episode_id, 'wpp_episode_transcript', true );
 
-				$transcript_output .= sprintf( $format,
-					get_the_content(),
-					esc_url( wp_get_attachment_url( $transcript_link_id ) )
-				);
-			} else {
-				$format = '<div class="wpp-transcript"><article class="wwp-transcript-text">%s</article></div>';
-				$transcript_output .= sprintf( $format, get_the_content() );
-			}
-		}
-		wp_reset_postdata();
-	} else {
+	if ( empty( $transcript_ids ) ) {
 		return false;
 	}
 
-	return $transcript_output . '</div>';
+	$transcript_id = array_pop( $transcript_ids );
+
+	$transcript = get_post( $transcript_id );
+	return $transcript->post_content;
 }
 
 /**
@@ -228,15 +217,15 @@ function wpp_get_sponsors_feed( $episode_id = null ) {
 		return false;
 	}
 
-	$sponsor_output = '<div class="wpp-episode-sponsors">';
-	$sponsor_output .= '<h4>' . esc_html__( 'Sponsored by:', 'wp-podcatcher' ) . '</h4>';
+
+	$sponsor_output .= '<h5>' . esc_html__( 'Sponsored by:', 'wp-podcatcher' ) . '</h5><ul>';
 	/**
 	 * 1: Sponsor URL
 	 * 2: Post Title (the_title)
 	 * 3: Logo if available, Title if no Logo
 	 * 4: Description (the_content)
 	 */
-	$format = '<div class="wpp-sponsor"><a href="%1$s" title="%2$s" target="_blank">%3$s</a> <p>%4$s</p></div>';
+	$format = '<li class="wpp-sponsor"><a href="%1$s" title="%2$s" target="_blank">%3$s</a>%4$s</li>';
 	$sponsors = get_posts( array( 'post_type' => 'sponsor', 'post__in' => $sponsor_ids ) );
 
 	if ( ! empty( $sponsors ) ) {
@@ -245,19 +234,34 @@ function wpp_get_sponsors_feed( $episode_id = null ) {
 
 			$sponsor_link = get_post_meta( get_the_id(), 'wpp_sponsor_link', true ); // @TODO: Check for link.
 
-			$sponsor_link_content = ( has_post_thumbnail() ) ? get_the_post_thumbnail( get_the_id(), 'wpp-big-square' ) : get_the_title();
+			$sponsor_link_content = get_the_title();
+
+			$content = ( get_the_content() ) ? ': ' . get_the_content() : '';
 
 			$sponsor_output .= sprintf( $format,
 				esc_url( $sponsor_link ),
 				esc_attr( get_the_title() ),
 				$sponsor_link_content,
-				get_the_content()
+				$content
 			);
 		}
 		wp_reset_postdata();
 	} else {
-		$sponsor_output .= '<h4 class="wpp-no-sponsors">No sponsors this week. Interested butt head?</h4>';
+		return null;
 	}
 
-	return $sponsor_output . '</div>'; // Close the div we opened on L53.
+	return $sponsor_output . '</ul>';
+}
+
+add_filter( 'content_save_pre', 'wpp_clean_google_docs' );
+
+function wpp_clean_google_docs( $content ) {
+	if ( ! ( 'transcript' == get_post_type() ) ) {
+		return $content;
+	} 
+
+	$content = str_replace( '&nbsp;', '', $content );
+	$content = str_replace( '</span>', '', $content );
+	
+	return preg_replace( '/<span[^>]+\>/i', '', $content );
 }

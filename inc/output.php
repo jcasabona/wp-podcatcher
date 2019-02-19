@@ -11,17 +11,17 @@
  * @param String $content from WordPress editor.
  */
 function wpp_append_sponsors( $content ) {
-	$sponsor_output = wpp_get_sponsors();
+	$sponsor_output = ( is_single() ) ? wpp_get_sponsors() : wpp_get_sponsors_feed();
 
-	if ( ! $sponsor_output ) { // This never executes. 
+	if ( ! $sponsor_output ) { 
 		return $content;
 	}
 
-	return $content . $sponsor_output;
+	return $sponsor_output . $content;
 }
 
 // Filter uses above function.
-add_filter( 'the_content', 'wpp_append_sponsors' );
+add_filter( 'the_content', 'wpp_append_sponsors', 9 );
 
 
 /**
@@ -32,13 +32,14 @@ add_filter( 'the_content', 'wpp_append_sponsors' );
 function wpp_append_sponsors_feed( $content ) {
 	$sponsor_output = wpp_get_sponsors_feed();
 
-	if ( ! $sponsor_output ) { // This never executes. 
+	if ( ! $sponsor_output || ! is_feed() ) {  
 		return $content;
 	}
 
-	return $content . $sponsor_output;
+	return apply_filters( 'the_content', $sponsor_output ) . $content;
 }
-add_filter( 'the_excerpt_rss', 'wpp_append_sponsors_feed' );
+// add_filter( 'the_excerpt_rss', 'wpp_append_sponsors_feed', 7 );
+// add_filter( 'the_content_rss', 'wpp_append_sponsors_feed', 7 );
 
 /**
  *  Functions to control the output of transcripts.
@@ -62,4 +63,4 @@ function wpp_append_transcript( $content ) {
 }
 
 // Filter uses above function.
-add_filter( 'the_content', 'wpp_append_transcript' );
+add_filter( 'the_content', 'wpp_append_transcript', 9 );

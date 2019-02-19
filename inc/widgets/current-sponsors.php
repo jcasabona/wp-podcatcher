@@ -41,7 +41,7 @@ class WPP_Current_Sponsors extends WP_Widget {
 			$args['after_title']
 		);
 
-		wpp_print_sponsors( wpp_get_latest_episode() );
+		wpp_print_sponsors( wpp_get_latest_episode(), false );
 
 		echo $args['after_widget'];
 	}
