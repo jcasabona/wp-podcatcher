@@ -34,7 +34,7 @@ add_action( 'plugins_loaded', 'wpp_check_for_powerpress' );
 
 define( 'WPP_VERSION', '1.0' );
 define( 'WPP_URL', plugin_dir_url( __FILE__ ) );
-define( 'WPP_ASSETS', 'WPP_URL' . '/assets/' );
+define( 'WPP_ASSETS', WPP_URL . '/assets/' );
 
 /* Include the Goods */
 include_once( 'fm/fieldmanager.php' );
@@ -59,3 +59,5 @@ add_image_size( 'wpp-small-square', 300, 250 );
 function wpp_enqueue_assets() {
 	wp_enqueue_style( 'wpp_style', WPP_ASSETS . 'style.css' );
 }
+
+//add_action( 'wp_enqueue_scripts', 'wpp_enqueue_assets' );

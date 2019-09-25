@@ -185,7 +185,15 @@ function wpp_get_transcript( $episode_id = null ) {
 
 	$transcript_id = array_pop( $transcript_ids );
 
-	return sprintf( '<a href="%s" class="wpp-transcript-link button" title="episode transcript">View Transcript</a>', get_permalink( $transcript_id ) );
+	$transcript = wpp_get_transcript_content( $episode_id );
+
+	$format = '<div class="wpp-transcript">
+		<a href="%s" class="wpp-transcript-link button alignright" title="episode transcript">View on separate page</a>
+		<h2>Transcript</h2> 
+		%s
+	</div>';
+
+	return sprintf( $format, get_permalink( $transcript_id ), $transcript );
 
 }
 
