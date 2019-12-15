@@ -17,11 +17,15 @@ function wpp_append_sponsors( $content ) {
 		return $content;
 	}
 
-	return $sponsor_output . $content;
+	if( ! is_feed() ) {
+		return $sponsor_output . $content;
+	} else {
+		return $content . $sponsor_output;
+	}
 }
 
 // Filter uses above function.
-add_filter( 'the_content', 'wpp_append_sponsors', 9 );
+add_filter( 'the_content', 'wpp_append_sponsors', 8 );
 
 
 /**
@@ -36,7 +40,7 @@ function wpp_append_sponsors_feed( $content ) {
 		return $content;
 	}
 
-	return apply_filters( 'the_content', $sponsor_output ) . $content;
+	return $content . apply_filters( 'the_content', $sponsor_output );
 }
 // add_filter( 'the_excerpt_rss', 'wpp_append_sponsors_feed', 7 );
 // add_filter( 'the_content_rss', 'wpp_append_sponsors_feed', 7 );
