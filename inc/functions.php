@@ -273,3 +273,29 @@ function wpp_clean_google_docs( $content ) {
 	
 	return preg_replace( '/<span[^>]+\>/i', '', $content );
 }
+
+add_action( 'acf/save_post', 'wpp_create_redirect' );
+
+//THIS ISNT WORKING
+
+function wpp_create_redirect( $post_id ) {
+
+	echo $_POST['acf']['episode_number'];
+
+	if ( ! isset( $_POST['acf']['episode_number'] ) ) {
+		return;
+	}
+
+	$slug = '/'. $_POST['acf']['episode_number'] . '/';
+
+	$attrs = array(
+		'request_url'		=> $slug,
+		'destination_url'	=> get_the_permalink( $post_id ),
+		'newwindow'		=> 0,
+		'nofollow'		=> 0,
+	);
+	
+	$add_redirect= qppr_create_quick_redirect( $attrs );
+
+	return;
+}
