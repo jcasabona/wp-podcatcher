@@ -274,14 +274,13 @@ function wpp_clean_google_docs( $content ) {
 	return preg_replace( '/<span[^>]+\>/i', '', $content );
 }
 
-add_action( 'acf/save_post', 'wpp_create_redirect' );
-
-
 /**
  * Automatically create a redirect when an episode number is saved for a post. 
  * Redirect is /episode-number/ => /post-slug/
  * Required Quick Redirects plugin
  */
+
+add_action( 'acf/save_post', 'wpp_create_redirect' );
 
 function wpp_create_redirect( $post_id ) {
 
@@ -304,4 +303,47 @@ function wpp_create_redirect( $post_id ) {
 
 
 	return $add_redirect;
+}
+
+/**
+ * Automatically email guest when an episode is published. 
+ * Attaches to acf/save_post in-case post is imeediately published,
+ * and publish_future_post in the (more likely) event that it's scheduled.
+ */
+
+add_action( 'acf/save_post', 'wpp_email_guest' );
+add_action( 'publish_future_post', 'wpp_email_guest', 10, 3 );
+
+
+function wpp_email_guest( $post_id ) {
+
+	if ( 'publish' !== get_post_status( $post_id ) ) {
+		return;
+	}
+
+	$guest_email = get_field( 'guest_email', $post_id );
+	$guest_name = get_field( 'guest_name', $post_id );
+	$episode_number = get_field( 'episode_number', $post_id );
+
+	if ( ! isset( $guest_email ) ) {
+		return;
+	}
+
+	$format = 'Hey %1$s,
+
+Thanks so much for coming on the show a while back. Your episode is live: %2$s/%3$s/
+
+I’d love, and would appreciate,  if you could share it out.
+
+Thanks again,
+
+Joe';
+
+	$subject = 'Your Episode is live!';
+	$message = sprintf( $format, $guest_name, get_site_url(), $episode_number );
+	$headers = 'From: jcasabona@gmail.com' . "\r\n" .
+		'Reply-To:jcasabona@gmail.com' . "\r\n" .
+		'X-Mailer: PHP/' . phpversion();
+
+	wp_mail( $guest_email, $subject, $message, $headers );
 }
