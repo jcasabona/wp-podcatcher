@@ -273,3 +273,35 @@ function wpp_clean_google_docs( $content ) {
 	
 	return preg_replace( '/<span[^>]+\>/i', '', $content );
 }
+
+add_action( 'acf/save_post', 'wpp_create_redirect' );
+
+
+/**
+ * Automatically create a redirect when an episode number is saved for a post. 
+ * Redirect is /episode-number/ => /post-slug/
+ * Required Quick Redirects plugin
+ */
+
+function wpp_create_redirect( $post_id ) {
+
+	$episode_number = get_field( 'episode_number', $post_id );
+
+	if ( ! isset( $episode_number ) ) {
+		return;
+	}
+
+	$slug = '/'. $episode_number . '/';
+
+	$attrs = array(
+		'request_url'		=> $slug,
+		'destination_url'	=> get_the_permalink( $post_id ),
+		'newwindow'		=> 0,
+		'nofollow'		=> 0,
+	);
+	
+	$add_redirect = qppr_create_quick_redirect( $attrs );
+
+
+	return $add_redirect;
+}
