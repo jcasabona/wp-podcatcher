@@ -276,17 +276,22 @@ function wpp_clean_google_docs( $content ) {
 
 add_action( 'acf/save_post', 'wpp_create_redirect' );
 
-//THIS ISNT WORKING
+
+/**
+ * Automatically create a redirect when an episode number is saved for a post. 
+ * Redirect is /episode-number/ => /post-slug/
+ * Required Quick Redirects plugin
+ */
 
 function wpp_create_redirect( $post_id ) {
 
-	echo $_POST['acf']['episode_number'];
+	$episode_number = get_field( 'episode_number', $post_id );
 
-	if ( ! isset( $_POST['acf']['episode_number'] ) ) {
+	if ( ! isset( $episode_number ) ) {
 		return;
 	}
 
-	$slug = '/'. $_POST['acf']['episode_number'] . '/';
+	$slug = '/'. $episode_number . '/';
 
 	$attrs = array(
 		'request_url'		=> $slug,
@@ -295,7 +300,8 @@ function wpp_create_redirect( $post_id ) {
 		'nofollow'		=> 0,
 	);
 	
-	$add_redirect= qppr_create_quick_redirect( $attrs );
+	$add_redirect = qppr_create_quick_redirect( $attrs );
 
-	return;
+
+	return $add_redirect;
 }
