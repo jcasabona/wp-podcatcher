@@ -5,6 +5,30 @@
  * @package wp_podcatcher
  */
 
+ /**
+ * Callback function to insert Fusebox player into content.
+ *
+ * @param String $content from WordPress editor.
+ */
+function wpp_fusebox_insert( $content ) {
+
+	// No player in the Feed!
+	if (is_feed() ) {
+		return $content;
+	}
+
+	$url = wpp_get_media_URL();
+
+	if ( $url ) {
+		$format = '[fusebox_track_player url="%s" title="%s"]';
+		return  do_shortcode( sprintf( $format, $url, get_the_title() ) ). $content;
+	}
+
+	return $content;
+}
+
+add_filter( 'the_content', 'wpp_fusebox_insert', 100 );
+
 /**
  * Callback function to insert sponsors into content on episode pages.
  *
@@ -25,7 +49,7 @@ function wpp_append_sponsors( $content ) {
 }
 
 // Filter uses above function.
-add_filter( 'the_content', 'wpp_append_sponsors', 8 );
+add_filter( 'the_content', 'wpp_append_sponsors', 10 );
 
 
 /**
