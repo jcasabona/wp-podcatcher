@@ -20,12 +20,12 @@ class WPP_PowerPress_Sponsors {
 
 		$fm = new Fieldmanager_Autocomplete( array(
 			'name' => 'wpp_episode_sponsor',
-			'limit'          => 0,
+			'limit'          => 3,
 			'add_more_label' => 'Add another Sponsor',
 			'sortable'       => true,
 			'show_edit_link' => true,
 			'datasource' => new Fieldmanager_Datasource_Post( array(
-				'query_args' => array( 'post_type' => 'sponsor', 'limit' => 2 ),
+				'query_args' => array( 'post_type' => 'sponsor', 'limit' => 3 ),
 			) ),
 		) );
 
