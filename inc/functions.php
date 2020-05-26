@@ -21,6 +21,33 @@ function wppc_no_fm() {
 // Start Your Engines.
 require_once( 'post-types/parent-class.php' );
 
+function wpp_get_sponsor_link( $spon_id, $episode_id = NULL ) {
+	$orig_link = get_post_meta( $spon_id, 'wpp_sponsor_link', true );
+	
+	if ( is_null( $episode_id ) || is_null( $spon_id ) ) {
+		return $orig_link;
+	}
+
+	$alt_links = get_fields( $spon_id );
+
+	if ( ! $alt_links ) {
+		return $orig_link;
+	}
+
+	$alt_links = $alt_links['alternate_links'];
+
+	if ( false === array_search( $episode_id, array_column( $alt_links, 'episode' ) ) ) {
+		return $orig_link;
+	}
+	foreach ( $alt_links as $alt ) {
+		if ( $alt['episode']  == $episode_id ) {
+			return $alt['alt_link'];
+		}
+	}
+
+	return $orig_link;
+}
+
 /**
  * Generate HTML for displaying sponsors associated with episode.
  *
@@ -55,7 +82,8 @@ function wpp_get_sponsors( $episode_id = null, $include_title = true ) {
 		while ( $sponsors->have_posts() ) {
 			$sponsors->the_post();
 
-			$sponsor_link = get_post_meta( get_the_id(), 'wpp_sponsor_link', true ); // @TODO: Check for link.
+
+			$sponsor_link = wpp_get_sponsor_link( get_the_id(), $episode_id );
 
 			$sponsor_link_content = ( has_post_thumbnail() ) ? get_the_post_thumbnail( get_the_id(), 'wpp-big-square' ) : get_the_title();
 
@@ -70,7 +98,7 @@ function wpp_get_sponsors( $episode_id = null, $include_title = true ) {
 		return null;
 	}
 
-	return $sponsor_output . '</div>'; // Close the div we opened on L53.
+	return $sponsor_output . '</div>'; // Close the div we opened on L51.
 }
 
 /**
@@ -240,8 +268,7 @@ function wpp_get_sponsors_feed( $episode_id = null ) {
 		foreach( $sponsors as $post ) {
 			setup_postdata( $post );
 
-			$sponsor_link = get_post_meta( get_the_id(), 'wpp_sponsor_link', true ); // @TODO: Check for link.
-
+			$sponsor_link = wpp_get_sponsor_link( get_the_id(), $episode_id );
 			$sponsor_link_content = get_the_title();
 
 			$content = ( get_the_content() ) ? ': ' . get_the_content() : '';
