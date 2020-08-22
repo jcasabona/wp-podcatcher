@@ -2,9 +2,9 @@
 /**
  * Plugin Name: WP Podcatcher
  * Plugin URI: http://howibuilt.it/
- * Description: This plugin adds some extra features to PowerPress to take your podcasting site to the next level.
+ * Description: This plugin adds some extra features to Castos to take your podcasting site to the next level.
  * Author: Joe Casabona
- * Version: 1.0
+ * Version: 2.0
  * Author URI: http://casabona.org/
 
  * @package wp-podcatcher
@@ -15,8 +15,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 
-/* Tell user if PowerPress is not installed, then kill it. */
-function wpp_check_for_powerpress() {
+/* Tell user if Seriously Simple Podcasting is not installed, then kill it. */
+function wpp_check_for_castos() {
 	if ( ! defined( 'SSP_CASTOS_APP_URL') ) {
 		add_action( 'admin_notices', function() {
 			?>
@@ -30,7 +30,7 @@ function wpp_check_for_powerpress() {
 	}
 }
 
-add_action( 'plugins_loaded', 'wpp_check_for_powerpress' );
+add_action( 'plugins_loaded', 'wpp_check_for_castos' );
 
 define( 'WPP_VERSION', '1.0' );
 define( 'WPP_URL', plugin_dir_url( __FILE__ ) );
