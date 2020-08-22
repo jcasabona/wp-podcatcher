@@ -5,18 +5,6 @@
  * @package wp-podcatcher
  */
 
-/**
- * Display a notification if Fieldmanager can't be found.
- */
-function wppc_no_fm() {
-?>
-		<div class="notice notice-warning is-dismissible">
-			<p>
-				<?php esc_html_e( 'Fieldmanager should be here. Something has gone wrong. Contact joe@wpinonemonth.com', 'wp-podcatcher' ); ?>
-			</p>
-		</div>
-<?php
-}
 
 // Start Your Engines.
 require_once( 'post-types/parent-class.php' );
@@ -30,11 +18,15 @@ function wpp_get_sponsor_link( $spon_id, $episode_id = NULL ) {
 
 	$alt_links = get_fields( $spon_id );
 
-	if ( ! $alt_links ) {
+	if ( false == $alt_links ) {
 		return $orig_link;
 	}
 
 	$alt_links = $alt_links['alternate_links'];
+
+	if( ! is_array( $alt_links ) ) {
+		return $orig_link;
+	}
 
 	if ( false === array_search( $episode_id, array_column( $alt_links, 'episode' ) ) ) {
 		return $orig_link;
@@ -56,7 +48,7 @@ function wpp_get_sponsor_link( $spon_id, $episode_id = NULL ) {
 function wpp_get_sponsors( $episode_id = null, $include_title = true ) {
 	global $post;
 	$episode_id  = ( ! empty( $episode_id ) ) ? $episode_id :  $post->ID;
-	$sponsor_ids = get_post_meta( $episode_id, 'wpp_episode_sponsor', true );
+	$sponsor_ids = get_post_meta( $episode_id, 'hibi_episode_sponsor', true );
 
 	if ( empty( $sponsor_ids ) ) {
 		return false;
@@ -122,7 +114,7 @@ function wpp_get_latest_episode() {
 		'posts_per_page' => 1,
 		'orderby' => 'post_date',
 		'order' => 'DESC',
-		'meta_key' => 'enclosure', // This is the meta key used by PowerPress.
+		'post_type' => 'podcast',
 	);
 
 	$latest_episode = new WP_Query( $args );
@@ -141,7 +133,7 @@ function wpp_get_upcoming_episodes( $posts_per_page = 1 ) {
 		'post_status' => 'future',
 		'orderby' => 'post_date',
 		'order' => 'ASC',
-		'meta_key' => 'enclosure', // This is the meta key used by PowerPress.
+		'post_type' => 'podcast',
 	);
 
 	$next_episodes = new WP_Query( $args );
@@ -239,6 +231,27 @@ function wpp_get_transcript_content( $episode_id = null ) {
 	return $transcript->post_content;
 }
 
+function convert_wpp_to_hibi() {
+	$args = array(
+		'posts_per_page'   => -1,
+		'post_type'        => 'post',
+	);
+	$the_query = new WP_Query( $args );
+
+	while ( $the_query->have_posts() ) {
+		$the_query->the_post();
+		$old_t = get_post_meta( get_the_ID(), 'wpp_episode_transcript', true );
+		$old_s = get_post_meta( get_the_ID(), 'wpp_episode_sponsor', true );
+
+		update_field( 'hibi_episode_sponsor', $old_s, get_the_ID() );
+		update_field( 'hibi_transcript', $old_t, get_the_ID() );
+	}
+
+	wp_reset_postdata();
+}
+
+//add_action( 'admin_init', 'convert_wpp_to_hibi' );
+
 /**
  * Generate HTML for displaying sponsors associated with episode feed.
  *
@@ -247,7 +260,7 @@ function wpp_get_transcript_content( $episode_id = null ) {
 function wpp_get_sponsors_feed( $episode_id = null ) {
 	global $post;
 	$episode_id  = ( ! empty( $episode_id ) ) ? $episode_id :  $post->ID;
-	$sponsor_ids = get_post_meta( $episode_id, 'wpp_episode_sponsor', true );
+	$sponsor_ids = get_post_meta( $episode_id, 'hibi_episode_sponsor', true );
 
 	if ( empty( $sponsor_ids ) ) {
 		return false;
@@ -307,29 +320,29 @@ function wpp_clean_google_docs( $content ) {
  * Required Quick Redirects plugin
  */
 
-add_action( 'acf/save_post', 'wpp_create_redirect' );
+//add_action( 'acf/save_post', 'wpp_create_redirect' );
 
 function wpp_create_redirect( $post_id ) {
 
 	$episode_number = get_field( 'episode_number', $post_id );
 
-	if ( ! isset( $episode_number ) ) {
+	if ( false === $episode_number ) {
 		return;
 	}
 
 	$slug = '/'. $episode_number . '/';
 
-	$attrs = array(
-		'request_url'		=> $slug,
-		'destination_url'	=> get_the_permalink( $post_id ),
-		'newwindow'		=> 0,
-		'nofollow'		=> 0,
+	$item = array(
+		'url'         => $slug,
+		'action_data' => get_the_permalink( $post_id ),
+		'regex'       => false,
+		'group_id'    => $group_id,
+		'match_type'  => 'url',
+		'action_type' => 'url',
+		'action_code' => 301,
 	);
 	
-	$add_redirect = qppr_create_quick_redirect( $attrs );
-
-
-	return $add_redirect;
+	return Red_Item::create( $item ); // This isn't working
 }
 
 /**
@@ -338,7 +351,7 @@ function wpp_create_redirect( $post_id ) {
  * and publish_future_post in the (more likely) event that it's scheduled.
  */
 
-add_action( 'acf/save_post', 'wpp_email_guest' );
+//add_action( 'acf/save_post', 'wpp_email_guest' );
 add_action( 'publish_future_post', 'wpp_email_guest', 10, 3 );
 
 
@@ -376,11 +389,8 @@ Joe';
 }
 
 function wpp_get_media_URL() {
-	if ( function_exists( 'powerpress_get_enclosure_data' ) ) {
-		$episodeData = powerpress_get_enclosure_data( get_the_ID() );
-		if ( ! empty( $episodeData['url'] ) ) {
-			return $episodeData['url'];
-		}
+	if ( function_exists( 'ss_get_podcast' ) ) {
+		return get_post_meta( get_the_id(), 'audio_file', true );
 	}
 
 	return false;

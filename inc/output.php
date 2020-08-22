@@ -28,7 +28,7 @@ function wpp_fusebox_insert( $content ) {
 }
 
 add_filter( 'the_content', 'wpp_fusebox_insert', 100 );
-
+//add_filter( 'the_excerpt', 'wpp_fusebox_insert', 100 );
 /**
  * Callback function to insert sponsors into content on episode pages.
  *

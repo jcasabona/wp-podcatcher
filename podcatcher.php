@@ -17,12 +17,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /* Tell user if PowerPress is not installed, then kill it. */
 function wpp_check_for_powerpress() {
-	if ( ! defined( 'POWERPRESS_VERSION') ) {
+	if ( ! defined( 'SSP_CASTOS_APP_URL') ) {
 		add_action( 'admin_notices', function() {
 			?>
 					<div class="notice notice-warning is-dismissible">
 						<p>
-							<?php esc_html_e( 'It looks like PowerPress is not installed. We strongly recommend you use that with this plugin.', 'wp-podcatcher' ); ?>
+							<?php esc_html_e( 'It looks like Seriously Simple Podcasting is not installed. We strongly recommend you use that with this plugin.', 'wp-podcatcher' ); ?>
 						</p>
 					</div>
 			<?php
@@ -37,15 +37,9 @@ define( 'WPP_URL', plugin_dir_url( __FILE__ ) );
 define( 'WPP_ASSETS', WPP_URL . '/assets/' );
 
 /* Include the Goods */
-include_once( 'fm/fieldmanager.php' );
 include_once( 'inc/functions.php' );
 include_once( 'inc/output.php' );
 include_once( 'inc/widgets/widgets.php' );
-
-/* Tell user if Field Manager faild to load */
-if ( ! defined( 'FM_VERSION' ) ) {
-	add_action( 'admin_notices', 'wppc_no_fm' );
-}
 
 // Create ad image sizes.
 add_image_size( 'wpp-full-banner', 468, 60 );

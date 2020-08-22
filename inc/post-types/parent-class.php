@@ -38,7 +38,6 @@ class WP_Podcatcher {
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'register_cpt' ) );
-		add_action( 'fm_post_' . $this->name, array( $this, 'fm_setup' ) );
 		add_action( 'admin_init', array( $this, 'register_tax' ), 15 );
 	}
 
@@ -95,14 +94,6 @@ class WP_Podcatcher {
 	}
 
 	/**
-	 * Define custom meta fields via Field Manager
-	 */
-	public function fm_setup() {
-		// Slug for the time being.
-		return;
-	}
-
-	/**
 	 * Register a default custom Category
 	 */
 	public function register_tax() {
@@ -142,6 +133,6 @@ class WP_Podcatcher {
 
 //require_once( 'episodes.php' );
 require_once( 'sponsors.php' );
-require_once( 'powerpress-sponsors.php' );
+//require_once( 'powerpress-sponsors.php' );
 require_once( 'transcripts.php' );
-require_once( 'episode-transcripts.php' );
+//require_once( 'episode-transcripts.php' );

@@ -25,11 +25,11 @@ class WPP_PowerPress_Sponsors {
 			'sortable'       => true,
 			'show_edit_link' => true,
 			'datasource' => new Fieldmanager_Datasource_Post( array(
-				'query_args' => array( 'post_type' => 'sponsor', 'limit' => 3 ),
+				'query_args' => array( 'post_type' => 'sponsor', 'limit' => 4 ),
 			) ),
 		) );
 
-		$fm->add_meta_box( 'Episode/Post Sponsor', 'post' );
+		$fm->add_meta_box( 'Episode/Post Sponsor', array('post', 'podcast') );
 	}
 } // END class
 

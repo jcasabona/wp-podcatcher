@@ -28,7 +28,7 @@ class WPP_Episode_Transcripts{
 			) ),
 		) );
 
-		$fm->add_meta_box( 'Episode Transcript', 'post' );
+		$fm->add_meta_box( 'Episode Transcript', array('post', 'podcast') );
 	}
 } // END class
 
