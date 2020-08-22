@@ -21,16 +21,6 @@ class WPP_Transcripts extends WP_Podcatcher {
 		$this->icon .= 'media-text';
 		parent::__construct();
 	}
-
-	/**
-	 * Define custom meta fields via Field Manager
-	 */
-	public function fm_setup() {
-		$fm = new Fieldmanager_Media( array(
-			'name' => 'wpp_transcript_file',
-		) );
-		$fm->add_meta_box( 'Transcript File', array( $this->name ) );
-	}
 } // END class
 
 new WPP_Transcripts();

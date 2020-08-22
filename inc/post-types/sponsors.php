@@ -21,16 +21,6 @@ class WPP_Sponsors extends WP_Podcatcher {
 		$this->icon .= 'id';
 		parent::__construct();
 	}
-
-	/**
-	 * Define custom meta fields via Field Manager
-	 */
-	public function fm_setup() {
-		$fm = new Fieldmanager_Link( array(
-			'name' => 'wpp_sponsor_link',
-		) );
-		$fm->add_meta_box( 'Sponsor Link', array( $this->name ) );
-	}
 } // END class
 
 new WPP_Sponsors();

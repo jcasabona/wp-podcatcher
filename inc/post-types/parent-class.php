@@ -129,10 +129,8 @@ class WP_Podcatcher {
 			'query_var'         => true,
 		) );
 	}
+
 } // END class
 
-//require_once( 'episodes.php' );
 require_once( 'sponsors.php' );
-//require_once( 'powerpress-sponsors.php' );
 require_once( 'transcripts.php' );
-//require_once( 'episode-transcripts.php' );
