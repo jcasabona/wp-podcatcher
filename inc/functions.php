@@ -320,7 +320,7 @@ function wpp_clean_google_docs( $content ) {
  * Required Quick Redirects plugin
  */
 
-//add_action( 'acf/save_post', 'wpp_create_redirect' );
+add_action( 'acf/save_post', 'wpp_create_redirect' );
 
 function wpp_create_redirect( $post_id ) {
 
@@ -330,19 +330,20 @@ function wpp_create_redirect( $post_id ) {
 		return;
 	}
 
-	$slug = '/'. $episode_number . '/';
+	$slug = '/'. $episode_number;
 
-	$item = array(
+	$redirect_info = array(
 		'url'         => $slug,
-		'action_data' => get_the_permalink( $post_id ),
+		'action_data' => array( 'url' => get_the_permalink( $post_id ) ),
 		'regex'       => false,
-		'group_id'    => $group_id,
+		'group_id'    => 1,
 		'match_type'  => 'url',
 		'action_type' => 'url',
 		'action_code' => 301,
 	);
-	
-	return Red_Item::create( $item ); // This isn't working
+
+	Red_Item::create( $redirect_info );
+	return;
 }
 
 /**
