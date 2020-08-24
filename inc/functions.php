@@ -190,20 +190,18 @@ function wpp_schedule_shortcode( $atts ) {
 add_shortcode( 'wpp_schedule', 'wpp_schedule_shortcode' );
 
 /**
- * Generate HTML for displaying transcript associated with episode.
+ * Generate HTML for displaying  associated with episode.
  *
  * @return HTML string if there is transcript, false if there are not.
  */
 function wpp_get_transcript( $episode_id = null ) {
 
 	$episode_id  = ( ! empty( $episode_id ) ) ? $episode_id :  get_the_id();
-	$transcript_ids = get_post_meta( $episode_id, 'wpp_episode_transcript', true );
+	$transcript_id = get_post_meta( $episode_id, 'hibi_transcript', true );
 
-	if ( empty( $transcript_ids ) ) {
+	if ( empty( $transcript_id ) ) {
 		return false;
 	}
-
-	$transcript_id = array_pop( $transcript_ids );
 
 	$transcript = wpp_get_transcript_content( $episode_id );
 
@@ -219,16 +217,14 @@ function wpp_get_transcript( $episode_id = null ) {
 
 function wpp_get_transcript_content( $episode_id = null ) {
 	$episode_id  = ( ! empty( $episode_id ) ) ? $episode_id :  get_the_id();
-	$transcript_ids = get_post_meta( $episode_id, 'wpp_episode_transcript', true );
+	$transcript_id = get_post_meta( $episode_id, 'hibi_transcript', true );
 
-	if ( empty( $transcript_ids ) ) {
+	if ( empty( $transcript_id ) ) {
 		return false;
 	}
 
-	$transcript_id = array_pop( $transcript_ids );
-
 	$transcript = get_post( $transcript_id );
-	return $transcript->post_content;
+	return  wpautop( $transcript->post_content, true );
 }
 
 function convert_wpp_to_hibi() {
@@ -389,9 +385,10 @@ Joe';
 	wp_mail( $guest_email, $subject, $message, $headers );
 }
 
-function wpp_get_media_URL() {
+function wpp_get_media_URL( $id = null ) {
 	if ( function_exists( 'ss_get_podcast' ) ) {
-		return get_post_meta( get_the_id(), 'audio_file', true );
+		$id = $id ?? get_the_id();
+		return get_post_meta( $id, 'audio_file', true );
 	}
 
 	return false;
