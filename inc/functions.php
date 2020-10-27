@@ -317,29 +317,42 @@ function wpp_clean_google_docs( $content ) {
  * Required Quick Redirects plugin
  */
 
-add_action( 'acf/save_post', 'wpp_create_redirect' );
+add_action( 'publish_post', 'wpp_create_redirect' );
 
 function wpp_create_redirect( $post_id ) {
 
-	$episode_number = get_field( 'episode_number', $post_id );
-
-	if ( false === $episode_number ) {
+	if ( 'post' != get_post_type( $post_id ) ) {
+		error_log( "Not a post Post Type" );
 		return;
 	}
 
-	$slug = '/'. $episode_number;
+	$episode_number = get_field( 'episode_number', $post_id );
 
-	$redirect_info = array(
-		'url'         => $slug,
-		'action_data' => array( 'url' => get_the_permalink( $post_id ) ),
-		'regex'       => false,
-		'group_id'    => 1,
-		'match_type'  => 'url',
-		'action_type' => 'url',
-		'action_code' => 301,
-	);
+	if ( empty( $episode_number ) ) {
+		error_log( "No episode number." );
+		return;
+	}
 
-	Red_Item::create( $redirect_info );
+	error_log( get_post_status( $post_id ) );
+
+	if ( 'publish' == get_post_status( $post_id ) ) {
+		error_log( "Creating redirect." );
+
+		$slug = '/'. $episode_number;
+
+		$redirect_info = array(
+			'url'         => $slug,
+			'action_data' => array( 'url' => get_the_permalink( $post_id ) ),
+			'regex'       => false,
+			'group_id'    => 1,
+			'match_type'  => 'url',
+			'action_type' => 'url',
+			'action_code' => 301,
+		);
+
+		Red_Item::create( $redirect_info );
+	}
+
 	return;
 }
 
