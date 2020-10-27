@@ -317,7 +317,7 @@ function wpp_clean_google_docs( $content ) {
  * Required Quick Redirects plugin
  */
 
-add_action( 'publish_post', 'wpp_create_redirect' );
+add_action( 'acf/save_post', 'wpp_create_redirect' );
 
 function wpp_create_redirect( $post_id ) {
 
@@ -335,11 +335,12 @@ function wpp_create_redirect( $post_id ) {
 
 	error_log( get_post_status( $post_id ) );
 
-	if ( 'publish' == get_post_status( $post_id ) ) {
+	if ( 'publish' == get_post_status( $post_id ) || 'future' == get_post_status( $post_id ) ) {
 		error_log( "Creating redirect." );
 
 		$slug = '/'. $episode_number;
 
+		// @TODO: Fix duplicate redirect creation. 
 		$redirect_info = array(
 			'url'         => $slug,
 			'action_data' => array( 'url' => get_the_permalink( $post_id ) ),
