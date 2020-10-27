@@ -114,7 +114,7 @@ function wpp_get_latest_episode() {
 		'posts_per_page' => 1,
 		'orderby' => 'post_date',
 		'order' => 'DESC',
-		'post_type' => 'podcast',
+		'post_type' => array( 'post', 'podcast' ),
 	);
 
 	$latest_episode = new WP_Query( $args );
@@ -133,7 +133,7 @@ function wpp_get_upcoming_episodes( $posts_per_page = 1 ) {
 		'post_status' => 'future',
 		'orderby' => 'post_date',
 		'order' => 'ASC',
-		'post_type' => 'podcast',
+		'post_type' => array( 'post', 'podcast' ),
 	);
 
 	$next_episodes = new WP_Query( $args );
@@ -211,7 +211,7 @@ function wpp_get_transcript( $episode_id = null ) {
 		%s
 	</div>';
 
-	return sprintf( $format, get_permalink( $transcript_id ), $transcript );
+	return sprintf( $format, get_permalink( $transcript_id[0] ), $transcript );
 
 }
 
@@ -220,10 +220,11 @@ function wpp_get_transcript_content( $episode_id = null ) {
 	$transcript_id = get_post_meta( $episode_id, 'hibi_transcript', true );
 
 	if ( empty( $transcript_id ) ) {
+		echo '<!--empty man-->';
 		return false;
 	}
 
-	$transcript = get_post( $transcript_id );
+	$transcript = get_post( $transcript_id[0] );
 	return  wpautop( $transcript->post_content, true );
 }
 
