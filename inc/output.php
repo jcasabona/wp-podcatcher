@@ -92,3 +92,10 @@ function wpp_append_transcript( $content ) {
 
 // Filter uses above function.
 add_filter( 'the_content', 'wpp_append_transcript', 9 );
+
+function wpp_remove_empty_p( $content ) {
+	$content = force_balance_tags( $content );
+	$content = preg_replace( '~\s?<p>(&nbsp;)+</p>\s?~', '', $content );
+	return $content;
+}
+add_filter('the_content', 'wpp_remove_empty_p', 99999);
