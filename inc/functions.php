@@ -203,6 +203,8 @@ function wpp_get_transcript( $episode_id = null ) {
 		return false;
 	}
 
+	$transcript_id = wpp_clean_transcript_id( $transcript_id );
+
 	$transcript = wpp_get_transcript_content( $episode_id );
 
 	$format = '<div class="wpp-transcript">
@@ -211,7 +213,7 @@ function wpp_get_transcript( $episode_id = null ) {
 		%s
 	</div>';
 
-	return sprintf( $format, get_permalink( $transcript_id[0] ), $transcript );
+	return sprintf( $format, get_permalink( $transcript_id ), $transcript );
 
 }
 
@@ -224,7 +226,9 @@ function wpp_get_transcript_content( $episode_id = null ) {
 		return false;
 	}
 
-	$transcript = get_post( $transcript_id[0] );
+	$transcript_id = wpp_clean_transcript_id( $transcript_id );
+
+	$transcript = get_post( $transcript_id );
 	return  wpautop( $transcript->post_content, true );
 }
 
@@ -248,6 +252,10 @@ function convert_wpp_to_hibi() {
 }
 
 //add_action( 'admin_init', 'convert_wpp_to_hibi' );
+
+function wpp_clean_transcript_id( $transcript_id ) {
+	return ( is_array() ) ? $transcript_id[0] : $transcript_id;
+}
 
 /**
  * Generate HTML for displaying sponsors associated with episode feed.
@@ -408,3 +416,27 @@ function wpp_get_media_URL( $id = null ) {
 
 	return false;
 }
+
+function wpp_check_environment( $user_id ) {
+	switch ( wp_get_environment_type() ) {
+		case 'local':
+			$admin_color = 'sunrise';
+			break;
+		case 'development':
+			$admin_color = 'sunrise';
+			break;
+		case 'staging':
+			$admin_color = 'blue';
+			break;
+		default: 
+			$admin_color = get_user_option( 'admin_color' );
+	}
+
+	$args = array(
+		'ID' => get_current_user_id(),
+		'admin_color' => $admin_color,
+	);
+
+	wp_update_user( $args );
+}
+add_action( 'admin_init', 'wpp_check_environment' );
