@@ -254,7 +254,7 @@ function convert_wpp_to_hibi() {
 //add_action( 'admin_init', 'convert_wpp_to_hibi' );
 
 function wpp_clean_transcript_id( $transcript_id ) {
-	return ( is_array() ) ? $transcript_id[0] : $transcript_id;
+	return ( is_array( $transcript_id ) ) ? $transcript_id[0] : $transcript_id;
 }
 
 /**
