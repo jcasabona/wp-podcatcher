@@ -19,6 +19,7 @@ class WPP_Transcripts extends WP_Podcatcher {
 		$this->name = 'transcript';
 		$this->plural_name = 'transcripts';
 		$this->icon .= 'media-text';
+		$this->gutes = true;
 		parent::__construct();
 	}
 } // END class

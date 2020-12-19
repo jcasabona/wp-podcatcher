@@ -26,6 +26,13 @@ class WP_Podcatcher {
 	 */
 	public $plural_name;
 
+		/**
+	 * Enable Block Editor
+	 *
+	 * @var string
+	 */
+	public $gutes;
+
 	/**
 	 * Dashicon id
 	 *
@@ -78,6 +85,7 @@ class WP_Podcatcher {
 			'public'              => true,
 			'show_ui'             => true,
 			'show_in_menu'        => true,
+			'show_in_rest'        => $this->gutes,
 			'show_in_admin_bar'   => true,
 			'menu_icon'           => $this->icon,
 			'show_in_nav_menus'   => true,

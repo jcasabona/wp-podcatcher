@@ -19,6 +19,7 @@ class WPP_Sponsors extends WP_Podcatcher {
 		$this->name = 'sponsor';
 		$this->plural_name = 'sponsors';
 		$this->icon .= 'id';
+		$this->gutes = true;
 		parent::__construct();
 	}
 } // END class
