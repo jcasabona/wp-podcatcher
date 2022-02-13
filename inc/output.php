@@ -5,30 +5,11 @@
  * @package wp_podcatcher
  */
 
- /**
- * Callback function to insert Fusebox player into content.
- *
- * @param String $content from WordPress editor.
- */
+ // Deprecated
 function wpp_fusebox_insert( $content ) {
-
-	// No player in the Feed!
-	if (is_feed() ) {
-		return $content;
-	}
-
-	$url = wpp_get_media_URL();
-
-	if ( $url ) {
-		$format = '[fusebox_track_player url="%s" title="%s"]';
-		return  do_shortcode( sprintf( $format, $url, get_the_title() ) ). $content;
-	}
-
-	return $content;
+	return false;
 }
 
-//add_filter( 'the_content', 'wpp_fusebox_insert', 100 );
-//add_filter( 'the_excerpt', 'wpp_fusebox_insert', 100 );
 /**
  * Callback function to insert sponsors into content on episode pages.
  *
@@ -48,16 +29,29 @@ function wpp_append_sponsors( $content ) {
 	}
 }
 
-// Filter uses above function.
-add_filter( 'the_content', 'wpp_append_sponsors', 10 );
-
-
 /**
- * Callback function to insert sponsors into feed on episodes feed.
+ * Callback function to insert sponsors into content on SSP feed
  *
  * @param String $content from WordPress editor.
  */
+function wpp_spp_append_sponsors( $content ) {
+	$sponsor_output = wpp_get_sponsors_feed();
+
+	if ( ! $sponsor_output ) { 
+		return $content;
+	}
+
+	return $content . $sponsor_output;
+}
+
+// Filter uses above function.
+add_filter( 'the_content', 'wpp_append_sponsors', 10 );
+add_filter( 'ssp_feed_item_content', 'wpp_spp_append_sponsors', 10 );
+
+
+// Deprecated
 function wpp_append_sponsors_feed( $content ) {
+	return false;
 	$sponsor_output = wpp_get_sponsors_feed();
 
 	if ( ! $sponsor_output || ! is_feed() ) {  
@@ -66,8 +60,6 @@ function wpp_append_sponsors_feed( $content ) {
 
 	return $content . apply_filters( 'the_content', $sponsor_output );
 }
-// add_filter( 'the_excerpt_rss', 'wpp_append_sponsors_feed', 7 );
-// add_filter( 'the_content_rss', 'wpp_append_sponsors_feed', 7 );
 
 /**
  *  Functions to control the output of transcripts.
@@ -81,9 +73,10 @@ function wpp_append_sponsors_feed( $content ) {
  * @param String $content from WordPress editor.
  */
 function wpp_append_transcript( $content ) {
+	
 	$transcript_output = wpp_get_transcript();
 
-	if ( ! $transcript_output ) {
+	if ( ! $transcript_output || ! is_singular() ) {
 		return $content;
 	}
 

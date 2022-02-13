@@ -54,7 +54,7 @@ function wpp_get_sponsors( $episode_id = null, $include_title = true ) {
 		return false;
 	}
 
-	$sponsor_output = '';
+	$sponsor_output = '<section class="wpp-sponsors">';
 
 	if ( $include_title ) {
 		$sponsor_output .= '<h4>' . esc_html__( 'Sponsored by:', 'wp-podcatcher' ) . '</h4>';
@@ -67,7 +67,7 @@ function wpp_get_sponsors( $episode_id = null, $include_title = true ) {
 	 * 3: Logo if available, Title if no Logo
 	 * 4: Description (the_content)
 	 */
-	$format = '<div class="wpp-sponsor"><a href="%1$s" title="%2$s" target="_blank">%3$s</a></div>';
+	$format = '<div class="wpp-sponsor"><a href="%1$s" title="%2$s" rel="sponsored" target="_blank">%3$s</a></div>';
 	$sponsors = new WP_Query( array( 'post_type' => 'sponsor', 'post__in' => $sponsor_ids ) );
 
 	if ( $sponsors->have_posts() ) {
@@ -90,7 +90,7 @@ function wpp_get_sponsors( $episode_id = null, $include_title = true ) {
 		return null;
 	}
 
-	return $sponsor_output . '</div>'; // Close the div we opened on L51.
+	return $sponsor_output . '</div></section>'; // Close the div we opened on L51.
 }
 
 /**
@@ -114,7 +114,7 @@ function wpp_get_latest_episode() {
 		'posts_per_page' => 1,
 		'orderby' => 'post_date',
 		'order' => 'DESC',
-		'post_type' => array( 'post', 'podcast' ),
+		'post_type' => array( 'post' ),
 	);
 
 	$latest_episode = new WP_Query( $args );
@@ -190,6 +190,20 @@ function wpp_schedule_shortcode( $atts ) {
 add_shortcode( 'wpp_schedule', 'wpp_schedule_shortcode' );
 
 /**
+ * Shortcode for current sponsors
+ *
+ */
+
+function wpp_sponsor_shortcode( $atts ) {
+
+	return wpp_get_sponsors();
+}
+
+add_shortcode( 'current_sponsors', 'wpp_sponsor_shortcode' );
+
+
+
+/**
  * Generate HTML for displaying  associated with episode.
  *
  * @return HTML string if there is transcript, false if there are not.
@@ -199,25 +213,28 @@ function wpp_get_transcript( $episode_id = null ) {
 	$episode_id  = ( ! empty( $episode_id ) ) ? $episode_id :  get_the_id();
 	$transcript_id = get_post_meta( $episode_id, 'hibi_transcript', true );
 
-	if ( empty( $transcript_id ) ) {
+	if ( empty( $transcript_id ) || ! is_singular() ) {
 		return false;
 	}
 
 	$transcript_id = wpp_clean_transcript_id( $transcript_id );
 
 	$transcript = wpp_get_transcript_content( $episode_id );
-
-	$format = '<div class="wpp-transcript">
-		<a href="%s" class="wpp-transcript-link button alignright" title="episode transcript">View on separate page</a>
-		<h2>Transcript</h2> 
-		%s
+	
+	// Hey this currently depends on the Genesis Blocks plugin - specifically the accordion block.
+	$format = '<div class="wp-block-genesis-blocks-gb-accordion gb-block-accordion wpp-transcript">
+		<details>
+			<summary class="gb-accordion-title">Transcript</summary>
+			<div class="gb-accordion-text">%s</div>
+		</details>
 	</div>';
 
-	return sprintf( $format, get_permalink( $transcript_id ), $transcript );
+	return sprintf( $format, $transcript );
 
 }
 
 function wpp_get_transcript_content( $episode_id = null ) {
+	if( is_feed() ) return false;
 	$episode_id  = ( ! empty( $episode_id ) ) ? $episode_id :  get_the_id();
 	$transcript_id = get_post_meta( $episode_id, 'hibi_transcript', true );
 
@@ -272,14 +289,14 @@ function wpp_get_sponsors_feed( $episode_id = null ) {
 	}
 
 
-	$sponsor_output .= '<h5>' . esc_html__( 'Sponsored by:', 'wp-podcatcher' ) . '</h5><ul>';
+	$sponsor_output .= '<p><b>' . esc_html__( 'Sponsored by:', 'wp-podcatcher' ) . '</b> ';
 	/**
 	 * 1: Sponsor URL
 	 * 2: Post Title (the_title)
 	 * 3: Logo if available, Title if no Logo
 	 * 4: Description (the_content)
 	 */
-	$format = '<li class="wpp-sponsor"><a href="%1$s" title="%2$s" target="_blank">%3$s</a>%4$s</li>';
+	$format = '<a href="%1$s" title="%2$s" rel="sponsored" target="_blank">%3$s</a> | ';
 	$sponsors = get_posts( array( 'post_type' => 'sponsor', 'post__in' => $sponsor_ids ) );
 
 	if ( ! empty( $sponsors ) ) {
@@ -289,13 +306,13 @@ function wpp_get_sponsors_feed( $episode_id = null ) {
 			$sponsor_link = wpp_get_sponsor_link( get_the_id(), $episode_id );
 			$sponsor_link_content = get_the_title();
 
-			$content = ( get_the_content() ) ? ': ' . get_the_content() : '';
+			//$content = ( get_the_content() ) ? ': ' . get_the_content() : '';
 
 			$sponsor_output .= sprintf( $format,
 				esc_url( $sponsor_link ),
 				esc_attr( get_the_title() ),
 				$sponsor_link_content,
-				$content
+				//$content
 			);
 		}
 		wp_reset_postdata();
@@ -303,7 +320,7 @@ function wpp_get_sponsors_feed( $episode_id = null ) {
 		return null;
 	}
 
-	return $sponsor_output . '</ul>';
+	return substr($sponsor_output, 0, strlen($sponsor_output) - 3) . '</p>';
 }
 
 add_filter( 'content_save_pre', 'wpp_clean_google_docs' );
@@ -439,4 +456,47 @@ function wpp_check_environment( $user_id ) {
 
 	wp_update_user( $args );
 }
-add_action( 'admin_init', 'wpp_check_environment' );
+// add_action( 'admin_init', 'wpp_check_environment' );
+
+function wpp_sponsor_count() {
+	$args = array(
+		'posts_per_page' => -1,
+		'orderby' => 'post_date',
+		'order' => 'DESC',
+		'post_type' => array( 'post' ),
+		'category__not_in' => array( 510 ),
+	);
+
+	$posts = new WP_Query( $args );
+	$output = '';
+	$format = '<tr><td>%4$s</td><td><a href="%2$s">%1$s</a></td><td class="%5$s">%3$s</td></tr>';
+	if ( $posts->have_posts() ) {
+		$output = '<table><thead><th>Published</th><th>Title</th><th>Available Spots</th></thead><tbody>';
+		while ( $posts->have_posts() ) {
+			$posts->the_post();
+			$spons = get_post_meta( get_the_id(), 'hibi_episode_sponsor', true );
+			
+			$count = 3 - count($spons);
+			
+			$class = ( $count <= 1 ) ? 'one_left' : 'more_left';
+			
+			if ( is_array( $spons ) && count($spons) < 3 ) {
+				$output .= sprintf( $format,
+					esc_attr( get_the_title() ),
+					esc_url( get_the_permalink() ),
+					$count,
+					get_the_date( 'Y-m-d' ),
+					$class
+				);
+			}
+		}
+		wp_reset_postdata();
+	} else {
+		return null;
+	}
+
+	$output .= '</tbody></table>';
+	return $output;
+}
+
+add_shortcode( 'spon_count', 'wpp_sponsor_count' );
