@@ -6,7 +6,7 @@ Tags: podcast, powerpress, blubrry, audio
 Donate link: https://www.paypal.me/jcasabona
 Requires at least: 4.6
 Tested up to: 4.8.2
-Stable tag: 1.0
+Stable tag: 3.0
 License: GPL V3
 
 This plugin adds some extra features to PowerPress to take your podcasting site to the next level. Requires PowerPress by Blubrry

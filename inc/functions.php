@@ -123,156 +123,23 @@ function wpp_get_latest_episode() {
 }
 
 /**
- * Get the next scheduled posts
- *
- * @param $posts_per_page int # of posts to display.
- */
-function wpp_get_upcoming_episodes( $posts_per_page = 1 ) {
-	$args = array(
-		'posts_per_page' => $posts_per_page,
-		'post_status' => 'future',
-		'orderby' => 'post_date',
-		'order' => 'ASC',
-		'post_type' => array( 'post', 'podcast' ),
-	);
-
-	$next_episodes = new WP_Query( $args );
-
-	$episode_output = '<div class="wpp-upcoming-episodes">';
-	/**
-	 * 1: Episode Title
-	 * 2: Time Stamp
-	 * 3: Human Readable Date
-	 */
-	$format = '<div class="wpp-upcoming-episode"><h4>%1$s</h4><time datetime="%2$s">%3$s</time></div>';
-
-	if ( $next_episodes->have_posts() ) {
-		while ( $next_episodes->have_posts() ) {
-			$next_episodes->the_post();
-
-			$episode_output .= sprintf( $format,
-				esc_attr( get_the_title() ),
-				esc_attr( get_the_date( 'c' ) ),
-				get_the_date()
-			);
-		}
-		wp_reset_postdata();
-	} else {
-		$episode_output .= '<h4 class="wpp-no-schedule">There are no scheduled episodes right now.</h4>';
-	}
-
-	return $episode_output . '</div>'; // Close the div we opened on L113.
-}
-
-/**
- * Print the next scheduled posts
- *
- * @param $posts_per_page int # of posts to display.
- */
-function wpp_print_upcoming_episodes( $posts_per_page = 1 ) {
-	echo wpp_get_upcoming_episodes();
-}
-
-/**
- * Shortcode for next scheduled posts
- *
- * @param $atts Array
- * [wpp_schedule number="1"]
- */
-function wpp_schedule_shortcode( $atts ) {
-	$a = shortcode_atts( array(
-		'number' => -1,
-	), $atts );
-
-	return wpp_get_upcoming_episodes( $a['number'] );
-}
-
-add_shortcode( 'wpp_schedule', 'wpp_schedule_shortcode' );
-
-/**
  * Shortcode for current sponsors
  *
  */
 
 function wpp_sponsor_shortcode( $atts ) {
 
-	return wpp_get_sponsors();
+	return wpp_get_sponsors( wpp_get_latest_episode(), false );
 }
 
 add_shortcode( 'current_sponsors', 'wpp_sponsor_shortcode' );
 
+function wpp_episode_sponsor_shortcode( $atts ) {
 
-
-/**
- * Generate HTML for displaying  associated with episode.
- *
- * @return HTML string if there is transcript, false if there are not.
- */
-function wpp_get_transcript( $episode_id = null ) {
-
-	$episode_id  = ( ! empty( $episode_id ) ) ? $episode_id :  get_the_id();
-	$transcript_id = get_post_meta( $episode_id, 'hibi_transcript', true );
-
-	if ( empty( $transcript_id ) || ! is_singular() ) {
-		return false;
-	}
-
-	$transcript_id = wpp_clean_transcript_id( $transcript_id );
-
-	$transcript = wpp_get_transcript_content( $episode_id );
-	
-	// Hey this currently depends on the Genesis Blocks plugin - specifically the accordion block.
-	$format = '<div class="wp-block-genesis-blocks-gb-accordion gb-block-accordion wpp-transcript">
-		<details>
-			<summary class="gb-accordion-title">Transcript</summary>
-			<div class="gb-accordion-text">%s</div>
-		</details>
-	</div>';
-
-	return sprintf( $format, $transcript );
-
+	return wpp_get_sponsors();
 }
 
-function wpp_get_transcript_content( $episode_id = null ) {
-	if( is_feed() ) return false;
-	$episode_id  = ( ! empty( $episode_id ) ) ? $episode_id :  get_the_id();
-	$transcript_id = get_post_meta( $episode_id, 'hibi_transcript', true );
-
-	if ( empty( $transcript_id ) ) {
-		echo '<!--empty man-->';
-		return false;
-	}
-
-	$transcript_id = wpp_clean_transcript_id( $transcript_id );
-
-	$transcript = get_post( $transcript_id );
-	return  wpautop( $transcript->post_content, true );
-}
-
-function convert_wpp_to_hibi() {
-	$args = array(
-		'posts_per_page'   => -1,
-		'post_type'        => 'post',
-	);
-	$the_query = new WP_Query( $args );
-
-	while ( $the_query->have_posts() ) {
-		$the_query->the_post();
-		$old_t = get_post_meta( get_the_ID(), 'wpp_episode_transcript', true );
-		$old_s = get_post_meta( get_the_ID(), 'wpp_episode_sponsor', true );
-
-		update_field( 'hibi_episode_sponsor', $old_s, get_the_ID() );
-		update_field( 'hibi_transcript', $old_t, get_the_ID() );
-	}
-
-	wp_reset_postdata();
-}
-
-//add_action( 'admin_init', 'convert_wpp_to_hibi' );
-
-function wpp_clean_transcript_id( $transcript_id ) {
-	return ( is_array( $transcript_id ) ) ? $transcript_id[0] : $transcript_id;
-}
+add_shortcode( 'episode_sponsors', 'wpp_episode_sponsor_shortcode' );
 
 /**
  * Generate HTML for displaying sponsors associated with episode feed.
@@ -337,49 +204,70 @@ function wpp_clean_google_docs( $content ) {
 }
 
 /**
- * Automatically create a redirect when an episode number is saved for a post. 
- * Redirect is /episode-number/ => /post-slug/
- * Required Quick Redirects plugin
+ * When Podcast Importer imports an episode, save the episode number
+ * (parsed from <itunes:episode> in the feed) directly as post meta and
+ * create the /NNN → permalink redirect. No title parsing needed — this
+ * fires after wp_insert_post() and after all importer meta is written.
+ *
+ * Hook source: podcast-importer-secondline/app/Helper/Importer/FeedItem.php
  */
-
-add_action( 'acf/save_post', 'wpp_create_redirect' );
-
-function wpp_create_redirect( $post_id ) {
-
-	if ( 'post' != get_post_type( $post_id ) ) {
-		error_log( "Not a post Post Type" );
+add_action( 'podcast_importer_secondline_feed_item_imported', function( $feed_item ) {
+	if ( ! is_object( $feed_item ) || empty( $feed_item->current_post_id ) ) {
 		return;
 	}
 
-	$episode_number = get_field( 'episode_number', $post_id );
+	$post_id        = $feed_item->current_post_id;
+	$episode_number = isset( $feed_item->episode_number ) ? trim( (string) $feed_item->episode_number ) : '';
 
-	if ( empty( $episode_number ) ) {
-		error_log( "No episode number." );
+	if ( '' === $episode_number ) {
+		error_log( "🚫 [podcatcher] No <itunes:episode> on imported post {$post_id}" );
 		return;
 	}
 
-	error_log( get_post_status( $post_id ) );
+	// Stored as plain meta; ACF reads the same key.
+	update_post_meta( $post_id, 'episode_number', $episode_number );
 
-	if ( 'publish' == get_post_status( $post_id ) || 'future' == get_post_status( $post_id ) ) {
-		error_log( "Creating redirect." );
+	wpp_maybe_create_redirect( $post_id, $episode_number );
 
-		$slug = '/'. $episode_number;
+	error_log( "✅ [podcatcher] Saved episode_number {$episode_number} and redirect for post {$post_id}" );
+}, 20 );
 
-		// @TODO: Fix duplicate redirect creation. 
-		$redirect_info = array(
+/**
+ * Create a redirect from /NNN → permalink for a given episode number.
+ * Bails if Redirection plugin isn't loaded or a redirect already exists.
+ * Requires the Redirection plugin.
+ */
+function wpp_maybe_create_redirect( $post_id, $episode_number ) {
+	if ( empty( $episode_number ) ) return;
+
+	$slug = '/' . $episode_number;
+
+	global $wpdb;
+	$existing = $wpdb->get_var( $wpdb->prepare(
+		"SELECT id FROM {$wpdb->prefix}redirection_items WHERE url = %s",
+		$slug
+	));
+
+	if (!$existing) {
+		if ( ! class_exists( 'Red_Item' ) ) {
+			error_log( "⚠️ Redirection plugin not loaded — skipping redirect for {$slug}" );
+			return;
+		}
+
+		Red_Item::create([
 			'url'         => $slug,
-			'action_data' => array( 'url' => get_the_permalink( $post_id ) ),
+			'action_data' => [ 'url' => get_permalink( $post_id ) ],
 			'regex'       => false,
 			'group_id'    => 1,
 			'match_type'  => 'url',
 			'action_type' => 'url',
 			'action_code' => 301,
-		);
+		]);
 
-		Red_Item::create( $redirect_info );
+		error_log("🔁 Created redirect from {$slug} → " . get_permalink($post_id));
+	} else {
+		error_log("↩️ Redirect for {$slug} already exists.");
 	}
-
-	return;
 }
 
 /**
@@ -389,7 +277,7 @@ function wpp_create_redirect( $post_id ) {
  */
 
 //add_action( 'acf/save_post', 'wpp_email_guest' );
-add_action( 'publish_future_post', 'wpp_email_guest', 10, 3 );
+//add_action( 'publish_future_post', 'wpp_email_guest', 10, 3 );
 
 
 function wpp_email_guest( $post_id ) {
@@ -433,70 +321,3 @@ function wpp_get_media_URL( $id = null ) {
 
 	return false;
 }
-
-function wpp_check_environment( $user_id ) {
-	switch ( wp_get_environment_type() ) {
-		case 'local':
-			$admin_color = 'sunrise';
-			break;
-		case 'development':
-			$admin_color = 'sunrise';
-			break;
-		case 'staging':
-			$admin_color = 'blue';
-			break;
-		default: 
-			$admin_color = get_user_option( 'admin_color' );
-	}
-
-	$args = array(
-		'ID' => get_current_user_id(),
-		'admin_color' => $admin_color,
-	);
-
-	wp_update_user( $args );
-}
-// add_action( 'admin_init', 'wpp_check_environment' );
-
-function wpp_sponsor_count() {
-	$args = array(
-		'posts_per_page' => -1,
-		'orderby' => 'post_date',
-		'order' => 'DESC',
-		'post_type' => array( 'post' ),
-		'category__not_in' => array( 510 ),
-	);
-
-	$posts = new WP_Query( $args );
-	$output = '';
-	$format = '<tr><td>%4$s</td><td><a href="%2$s">%1$s</a></td><td class="%5$s">%3$s</td></tr>';
-	if ( $posts->have_posts() ) {
-		$output = '<table><thead><th>Published</th><th>Title</th><th>Available Spots</th></thead><tbody>';
-		while ( $posts->have_posts() ) {
-			$posts->the_post();
-			$spons = get_post_meta( get_the_id(), 'hibi_episode_sponsor', true );
-			
-			$count = 3 - count($spons);
-			
-			$class = ( $count <= 1 ) ? 'one_left' : 'more_left';
-			
-			if ( is_array( $spons ) && count($spons) < 3 ) {
-				$output .= sprintf( $format,
-					esc_attr( get_the_title() ),
-					esc_url( get_the_permalink() ),
-					$count,
-					get_the_date( 'Y-m-d' ),
-					$class
-				);
-			}
-		}
-		wp_reset_postdata();
-	} else {
-		return null;
-	}
-
-	$output .= '</tbody></table>';
-	return $output;
-}
-
-add_shortcode( 'spon_count', 'wpp_sponsor_count' );

@@ -141,4 +141,3 @@ class WP_Podcatcher {
 } // END class
 
 require_once( 'sponsors.php' );
-require_once( 'transcripts.php' );
